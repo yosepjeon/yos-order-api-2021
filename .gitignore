@@ -1,0 +1,22 @@
+# Eclipse
+.classpath
+.project
+.settings/
+
+# Intellij
+.idea/
+*.iml
+*.iws
+*.yml
+*.properties
+
+# Mac
+.DS_Store
+
+# Maven
+log/
+target/
+# Project exclude paths
+/.gradle/
+/build/
+/build/classes/java/main/

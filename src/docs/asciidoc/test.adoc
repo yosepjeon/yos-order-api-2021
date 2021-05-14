@@ -1,0 +1,14 @@
+= RESTful TEST Notes API Guide
+:doctype: book
+ifndef::snippets[]
+:snippets: ../../../build/generated-snippets
+endif::[]
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 4
+:sectlinks:
+
+include::{snippets}/test-restdoc/http-request.adoc[]
+include::{snippets}/test-restdoc/http-response.adoc[]
+include::{snippets}/test-restdoc/response-body.adoc[]
