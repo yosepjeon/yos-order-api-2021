@@ -5,43 +5,57 @@ import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDateTime
 import javax.jdo.annotations.Column
 import javax.jdo.annotations.Inheritance
+import javax.validation.constraints.NotBlank
 import javax.validation.constraints.NotNull
 
 @Table("order")
 data class OrderEntity(
     @Id
-    @Column(length = 100)
+    @Column(length = 300)
+    val orderId: String,
+
+    @NotNull
+    @Column(length = 300)
     val productId: String,
 
-    @NotNull
-    @Column( length=100)
-    val productName: String,
+    @NotBlank
+    @Column(length = 50)
+    val senderId: String
 
-    @Column
-    val productSale: Int,
 
-    @NotNull
-    @Column
-    val productPrice: Int,
-
-    @NotNull
-    @Column
-    val productQuantity: Int,
-
-    @Column
-    val productDetail: String,
-
-    @NotNull
-    @Column
-    val productType: String,
-
-    @NotNull
-    @Column
-    val productDetailType: String,
-
-    @Column
-    val productRdate: LocalDateTime,
-
-    @Column
-    val productUdate: LocalDateTime
+//    @Id
+//    @Column(length = 100)
+//    val productId: String,
+//
+//    @NotNull
+//    @Column( length=100)
+//    val productName: String,
+//
+//    @Column
+//    val productSale: Int,
+//
+//    @NotNull
+//    @Column
+//    val productPrice: Int,
+//
+//    @NotNull
+//    @Column
+//    val productQuantity: Int,
+//
+//    @Column
+//    val productDetail: String,
+//
+//    @NotNull
+//    @Column
+//    val productType: String,
+//
+//    @NotNull
+//    @Column
+//    val productDetailType: String,
+//
+//    @Column
+//    val productRdate: LocalDateTime,
+//
+//    @Column
+//    val productUdate: LocalDateTime
 )

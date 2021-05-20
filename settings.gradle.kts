@@ -1,1 +1,1 @@
-rootProject.name = "yos-order-api-2021"
+rootProject.name = "yos-order-orchestration-api-2021"

@@ -1,5 +1,6 @@
-package com.yosep.order.data.repository
+package com.yosep.order.order.data.repository
 
+import com.yosep.order.data.repository.OrderRepository
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

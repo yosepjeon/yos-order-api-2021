@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 
 @Service
-class ProductTestService @Autowired constructor(
+class OrderTestService @Autowired constructor(
     private val orderTestRepository: OrderTestRepository,
 ) {
     fun findProductById(productId: String):Mono<OrderTest> {
