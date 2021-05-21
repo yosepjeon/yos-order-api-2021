@@ -1,5 +1,7 @@
 package com.yosep.order.common
 
+import com.yosep.order.common.data.orderStateMap
+import com.yosep.order.data.vo.OrderState
 import io.netty.util.internal.logging.Slf4JLoggerFactory
 import org.junit.jupiter.api.*
 import org.springframework.beans.factory.annotation.Autowired
@@ -30,9 +32,10 @@ class EntityTest @Autowired constructor(
     @Test
     @DisplayName("[Common] @NotNull, @NotEmpty, @NotBlank 테스트")
     fun entityConstraintAnnotationTest() {
+        log.info("[Common] @NotNull, @NotEmpty, @NotBlank 테스트")
         val validator = Validation.buildDefaultValidatorFactory().validator
 
-        val testEntity = TestEntity("", " ", " ")
+        val testEntity = TestEntity("", "", " ")
         val errors = BeanPropertyBindingResult(testEntity, "testEntity")
 
         springValidator.validate(testEntity, errors)
@@ -40,5 +43,16 @@ class EntityTest @Autowired constructor(
         log.info("testEntity: $testEntity")
         log.info("constraintValidations: ${constraintValidations.size}")
         log.info("Errors: $errors")
+    }
+
+    @Test
+    @DisplayName("[Common] OrderState 테스트")
+    fun orderStateTest() {
+        log.info("[Common] OrderState 테스트")
+        val failValue = "COMPA"
+        val successValue = "COMP"
+
+        Assertions.assertEquals(true, orderStateMap[failValue] == null)
+        Assertions.assertEquals(false, orderStateMap[successValue] == null)
     }
 }

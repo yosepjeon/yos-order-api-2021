@@ -1,5 +1,6 @@
 package com.yosep.order.data.entity
 
+import com.fasterxml.jackson.annotation.JsonFormat
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDateTime
@@ -8,54 +9,54 @@ import javax.jdo.annotations.Inheritance
 import javax.validation.constraints.NotBlank
 import javax.validation.constraints.NotNull
 
-@Table("order")
+@Table("yos_order")
 data class OrderEntity(
-    @Id
-    @Column(length = 300)
+    @field:Id
+    @field:Column(length = 300)
     val orderId: String,
 
-    @NotNull
-    @Column(length = 300)
+    @field:Column(length = 300)
     val productId: String,
 
-    @NotBlank
-    @Column(length = 50)
-    val senderId: String
+    @field:Column(length = 50)
+    val senderId: String,
 
+    @field:Column(length = 50)
+    val senderName: String,
 
-//    @Id
-//    @Column(length = 100)
-//    val productId: String,
-//
-//    @NotNull
-//    @Column( length=100)
-//    val productName: String,
-//
-//    @Column
-//    val productSale: Int,
-//
-//    @NotNull
-//    @Column
-//    val productPrice: Int,
-//
-//    @NotNull
-//    @Column
-//    val productQuantity: Int,
-//
-//    @Column
-//    val productDetail: String,
-//
-//    @NotNull
-//    @Column
-//    val productType: String,
-//
-//    @NotNull
-//    @Column
-//    val productDetailType: String,
-//
-//    @Column
-//    val productRdate: LocalDateTime,
-//
-//    @Column
-//    val productUdate: LocalDateTime
+    @field:Column(length = 50)
+    val receiverName: String,
+
+    @field:Column(length = 50)
+    val phone: String,
+
+    @field:Column(length = 50)
+    val postCode: String,
+
+    @field:Column(length = 50)
+    val roadAddr: String,
+
+    @field:Column(length = 50)
+    val jibunAddr: String,
+
+    @field:Column(length = 50)
+    val extraAddr: String,
+
+    @field:Column(length = 50)
+    val detailAddr: String,
+
+    @field:Column(length = 50)
+    val orderState: String,
+
+    @field:Column
+    @field:JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    val orderRegisterDate: LocalDateTime,
+
+    @field:Column
+    @field:JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    val orderUpdateDate: LocalDateTime,
+
+    @field:Column
+    @field:JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    val orderCompleteDate: LocalDateTime,
 )
