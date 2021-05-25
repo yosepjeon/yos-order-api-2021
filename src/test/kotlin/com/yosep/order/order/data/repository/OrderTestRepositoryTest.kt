@@ -8,7 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import reactor.test.StepVerifier
 
 @SpringBootTest
-class OrderEntityTestRepositoryTest @Autowired constructor(
+class OrderTestRepositoryTest @Autowired constructor(
     private val orderTestRepository: OrderTestRepository
 ) {
     @Test

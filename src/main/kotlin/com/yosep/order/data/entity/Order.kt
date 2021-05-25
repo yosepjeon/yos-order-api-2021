@@ -2,16 +2,18 @@ package com.yosep.order.data.entity
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import org.springframework.data.annotation.Id
+import org.springframework.data.annotation.Transient
+import org.springframework.data.domain.Persistable
 import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDateTime
 import javax.jdo.annotations.Column
-import javax.jdo.annotations.Inheritance
-import javax.validation.constraints.NotBlank
-import javax.validation.constraints.NotNull
+
+
+
 
 @Table("yos_order")
-data class OrderEntity(
-    @field:Id
+data class Order(
+    @Id
     @field:Column(length = 300)
     val orderId: String,
 
@@ -54,9 +56,26 @@ data class OrderEntity(
 
     @field:Column
     @field:JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    val orderUpdateDate: LocalDateTime,
+    val orderUpdateDate: LocalDateTime?,
 
     @field:Column
     @field:JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    val orderCompleteDate: LocalDateTime,
-)
+    val orderCompleteDate: LocalDateTime?,
+): Persistable<String> {
+    @Transient
+    private var isNew = false
+
+    @Transient
+    override fun isNew(): Boolean {
+        return isNew || orderId == null
+    }
+
+    fun setAsNew(): Order? {
+        isNew = true
+        return this
+    }
+
+    override fun getId(): String? {
+        return this.orderId
+    }
+}

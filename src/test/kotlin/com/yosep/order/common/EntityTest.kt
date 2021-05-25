@@ -1,7 +1,6 @@
 package com.yosep.order.common
 
 import com.yosep.order.common.data.orderStateMap
-import com.yosep.order.data.vo.OrderState
 import io.netty.util.internal.logging.Slf4JLoggerFactory
 import org.junit.jupiter.api.*
 import org.springframework.beans.factory.annotation.Autowired

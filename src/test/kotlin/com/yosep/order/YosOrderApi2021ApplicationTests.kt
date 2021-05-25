@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
-class YosOrderEntityApi2021ApplicationTests {
+class YosOrderApi2021ApplicationTests {
 
 	@Test
 	fun contextLoads() {
