@@ -83,14 +83,14 @@ class OrderRepositoryTest @Autowired constructor(
 
         log.info("[OrderRepository] 주문 생성 성공 테스트")
 //        Spring Test에서는 R2dbc관련 @Transactional을 아직 지원하지 않는다.
-//        StepVerifier.create(orderRepository.save(order))
-//            .expectSubscription()
-//            .consumeNextWith {
-//                Assertions.assertEquals("create-order-test", it.orderId)
-//                log.info("$it")
-//                log.info("END")
-//            }
-//            .verifyComplete()
+        StepVerifier.create(orderRepository.save(order))
+            .expectSubscription()
+            .consumeNextWith {
+                Assertions.assertEquals("create-order-test", it.orderId)
+                log.info("$it")
+                log.info("END")
+            }
+            .verifyComplete()
 //        orderRepository.save(order)
 //            .map(Order::orderId)
 //            .flatMap(orderRepository::findById)
@@ -101,16 +101,16 @@ class OrderRepositoryTest @Autowired constructor(
 //            }
 //            .verifyComplete()
 
-        orderRepository.save(order)
-            .flatMap {
-                orderRepository.findById(it.orderId)
-            }
-            .`as`(Transaction::withRollback)
-            .`as`(StepVerifier::create)
-            .assertNext { order ->
-                Assertions.assertEquals(true, order!!.orderId == "create-order-test")
-            }
-            .verifyComplete()
+//        orderRepository.save(order)
+//            .flatMap {
+//                orderRepository.findById(it.orderId)
+//            }
+//            .`as`(Transaction::withRollback)
+//            .`as`(StepVerifier::create)
+//            .assertNext { order ->
+//                Assertions.assertEquals(true, order!!.orderId == "create-order-test")
+//            }
+//            .verifyComplete()
     }
 
     @Test

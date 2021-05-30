@@ -8,6 +8,9 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.validation.BeanPropertyBindingResult
 import org.springframework.validation.Errors
 import org.springframework.validation.Validator
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.*
 import javax.validation.Valid
 import javax.validation.Validation
 
@@ -53,5 +56,15 @@ class EntityTest @Autowired constructor(
 
         Assertions.assertEquals(true, orderStateMap[failValue] == null)
         Assertions.assertEquals(false, orderStateMap[successValue] == null)
+    }
+
+    @Test
+    @DisplayName("ID 생성 테스트")
+    fun ID_생성_테스트() {
+        val now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+        val uuid = UUID.randomUUID().toString().replace("-","")
+        val id = "$now-$uuid"
+
+        log.info(id)
     }
 }

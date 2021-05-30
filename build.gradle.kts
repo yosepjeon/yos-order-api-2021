@@ -65,6 +65,7 @@ dependencies {
 		exclude("org.apache.tomcat","spring-boot-starter-tomcat")
 	}
 	implementation("com.zaxxer:HikariCP:4.0.3")
+	implementation("org.modelmapper","modelmapper","2.4.3")
 	
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	implementation("com.h2database:h2")

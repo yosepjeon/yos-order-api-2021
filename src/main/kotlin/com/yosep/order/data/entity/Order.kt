@@ -15,53 +15,54 @@ import javax.jdo.annotations.Column
 data class Order(
     @Id
     @field:Column(length = 300)
-    val orderId: String,
+    var orderId: String = "",
 
     @field:Column(length = 300)
-    val productId: String,
+    var productId: String = "",
 
     @field:Column(length = 50)
-    val senderId: String,
+    var senderId: String = "",
 
     @field:Column(length = 50)
-    val senderName: String,
+    var senderName: String = "",
 
     @field:Column(length = 50)
-    val receiverName: String,
+    var receiverName: String = "",
 
     @field:Column(length = 50)
-    val phone: String,
+    var phone: String = "",
 
     @field:Column(length = 50)
-    val postCode: String,
+    var postCode: String = "",
 
     @field:Column(length = 50)
-    val roadAddr: String,
+    var roadAddr: String = "",
 
     @field:Column(length = 50)
-    val jibunAddr: String,
+    var jibunAddr: String = "",
 
     @field:Column(length = 50)
-    val extraAddr: String,
+    var extraAddr: String = "",
 
     @field:Column(length = 50)
-    val detailAddr: String,
+    var detailAddr: String = "",
 
     @field:Column(length = 50)
-    val orderState: String,
+    var orderState: String = "",
 
     @field:Column
     @field:JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    val orderRegisterDate: LocalDateTime,
+    var orderRegisterDate: LocalDateTime = LocalDateTime.now(),
 
     @field:Column
     @field:JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    val orderUpdateDate: LocalDateTime?,
+    var orderUpdateDate: LocalDateTime? = null,
 
     @field:Column
     @field:JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    val orderCompleteDate: LocalDateTime?,
+    var orderCompleteDate: LocalDateTime? = null,
 ): Persistable<String> {
+
     @Transient
     private var isNew = false
 

@@ -1,4 +1,6 @@
 package com.yosep.order.data.dto
 
-class CreatedOrderDto {
-}
+data class CreatedOrderDto(
+    val productId: String= "",
+    val senderId: String = ""
+)

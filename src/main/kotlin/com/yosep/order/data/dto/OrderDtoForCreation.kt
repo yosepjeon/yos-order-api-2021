@@ -4,9 +4,7 @@ import javax.validation.constraints.NotBlank
 import javax.validation.constraints.Size
 
 data class OrderDtoForCreation (
-    @field:NotBlank
-    @field:Size(max = 300)
-    val orderId: String,
+    var orderId: String,
 
     @field:NotBlank
     @field:Size(max = 300)
