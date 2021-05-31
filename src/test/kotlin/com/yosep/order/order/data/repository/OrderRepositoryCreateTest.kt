@@ -15,11 +15,11 @@ import java.time.LocalDateTime
 
 @SpringBootTest
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores::class)
-class OrderRepositoryTest @Autowired constructor(
+class OrderRepositoryCreateTest @Autowired constructor(
     private val orderRepository: OrderRepository,
     private val randomIdGenerator: RandomIdGenerator
 ) {
-    val log = Slf4JLoggerFactory.getInstance(OrderRepositoryTest::class.java)
+    val log = Slf4JLoggerFactory.getInstance(OrderRepositoryCreateTest::class.java)
     var orderId = ""
 
     @BeforeEach
@@ -205,31 +205,5 @@ class OrderRepositoryTest @Autowired constructor(
             .retry()
             .`as`(Transaction::withRollback)
             .subscribe()
-    }
-
-    @Test
-    @DisplayName("[OrderRepository] 주문 조회 성공 테스트")
-    fun 주문_조회_성공_테스트() {
-        log.info("[OrderRepository] 주문 조회 성공 테스트")
-
-        StepVerifier.create(orderRepository.findById("test0"))
-            .expectSubscription()
-            .consumeNextWith {
-                Assertions.assertEquals("test0", it.orderId)
-            }
-            .verifyComplete()
-    }
-
-    @Test
-    @DisplayName("[OrderRepository] 주문 조회 실패 테스트")
-    fun 주문_조회_실패_테스트() {
-        log.info("[OrderRepository] 주문 조회 실패 테스트")
-
-        StepVerifier.create(orderRepository.findById("test0"))
-            .expectSubscription()
-            .consumeNextWith {
-                Assertions.assertNotEquals("test!", it.orderId)
-            }
-            .verifyComplete()
     }
 }

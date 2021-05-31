@@ -2,12 +2,11 @@ package com.yosep.order.common
 
 import com.yosep.order.data.dto.OrderDtoForCreation
 import com.yosep.order.data.entity.Order
-import com.yosep.order.order.data.repository.OrderRepositoryTest
+import com.yosep.order.order.data.repository.OrderRepositoryCreateTest
 import io.netty.util.internal.logging.Slf4JLoggerFactory
 import org.junit.jupiter.api.*
 import org.modelmapper.ModelMapper
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
@@ -15,7 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest
 class ModelMapperTest @Autowired constructor(
     val orderDtoForCreationToOrderMapper: ModelMapper
 ) {
-    val log = Slf4JLoggerFactory.getInstance(OrderRepositoryTest::class.java)
+    val log = Slf4JLoggerFactory.getInstance(OrderRepositoryCreateTest::class.java)
 
     @BeforeEach
     fun printStart() {
