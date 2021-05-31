@@ -1,5 +1,9 @@
 package com.yosep.order.common
 
+import com.yosep.order.data.entity.OrderTest
+import com.yosep.order.data.repository.OrderTestRepository
+import com.yosep.order.order.data.repository.OrderTestRepositoryTest
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -31,10 +35,26 @@ import org.springframework.restdocs.payload.PayloadDocumentation.responseFields
 @ExtendWith(RestDocumentationExtension::class, SpringExtension::class)
 //@AutoConfigureWebTestClient
 class WebClientTest @Autowired constructor(
+    private val orderTestRepository: OrderTestRepository,
     private val context: ApplicationContext
 ) {
     private lateinit var webTestClient: WebTestClient
 
+    @BeforeEach
+    fun createOrderTestEntity() {
+        val orderTest = OrderTest("test","테스트")
+        orderTest.setAsNew()
+
+        orderTestRepository.save(orderTest)
+            .subscribe()
+    }
+
+    @AfterEach
+    fun deleteOrderTestEntity() {
+        val orderId = "test"
+        orderTestRepository.deleteById(orderId)
+            .subscribe()
+    }
 
     @BeforeEach
     fun setup(
@@ -76,9 +96,11 @@ class WebClientTest @Autowired constructor(
                 requestHeaders(),
                 responseHeaders(),
                 responseFields(
-                    fieldWithPath("id").type(JsonFieldType.STRING).description("상품 아이디"),
-                    fieldWithPath("name").type(JsonFieldType.STRING).description("상품 이름")
-                )
+                    fieldWithPath("orderId").type(JsonFieldType.STRING).description("상품 아이디"),
+                    fieldWithPath("name").type(JsonFieldType.STRING).description("상품 이름"),
+                    fieldWithPath("isNew").type(JsonFieldType.BOOLEAN).description("생성된 상품인지"),
+                    fieldWithPath("id").type(JsonFieldType.STRING).description("상품 아이디 자체"),
+                    )
             ))
     }
 }

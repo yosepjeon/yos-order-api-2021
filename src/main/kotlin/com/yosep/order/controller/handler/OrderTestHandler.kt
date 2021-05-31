@@ -22,6 +22,8 @@ class OrderTestHandler constructor(
     fun restDocTest(req: ServerRequest): Mono<ServerResponse> {
         return ok()
             .contentType(MediaType.APPLICATION_JSON)
-            .body(orderTestService.findProductById("test"))
+            .body(
+                orderTestService.findProductById("test")
+            )
     }
 }
