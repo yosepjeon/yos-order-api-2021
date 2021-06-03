@@ -1,10 +1,10 @@
-package com.yosep.order.order.data.repository
+package com.yosep.order.order.data.repository.legacy
 
 import com.yosep.order.common.data.RandomIdGenerator
 import com.yosep.order.common.reactive.Transaction
-import com.yosep.order.data.dto.OrderDtoForCreation
-import com.yosep.order.data.entity.Order
-import com.yosep.order.data.repository.OrderRepository
+import com.yosep.order.data.dto.OrderDtoForCreationLegacy
+import com.yosep.order.data.entity.OrderLegacy
+import com.yosep.order.data.repository.OrderLegacyRepository
 import io.netty.util.internal.logging.Slf4JLoggerFactory
 import org.junit.jupiter.api.*
 import org.springframework.beans.factory.annotation.Autowired
@@ -15,16 +15,16 @@ import java.time.LocalDateTime
 
 @SpringBootTest
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores::class)
-class OrderRepositoryCreateTest @Autowired constructor(
-    private val orderRepository: OrderRepository,
+class OrderLegacyRepositoryCreationTest @Autowired constructor(
+    private val orderLegacyRepository: OrderLegacyRepository,
     private val randomIdGenerator: RandomIdGenerator
 ) {
-    val log = Slf4JLoggerFactory.getInstance(OrderRepositoryCreateTest::class.java)
+    val log = Slf4JLoggerFactory.getInstance(OrderLegacyRepositoryCreationTest::class.java)
     var orderId = ""
 
     @BeforeEach
     fun createOrder() {
-        val order = Order(
+        val order = OrderLegacy(
             "test0",
             "product-01",
             "sender1",
@@ -44,7 +44,7 @@ class OrderRepositoryCreateTest @Autowired constructor(
 
         order.setAsNew()
 
-        orderRepository.save(order)
+        orderLegacyRepository.save(order)
             .map {
                 orderId = it.orderId
             }
@@ -55,7 +55,7 @@ class OrderRepositoryCreateTest @Autowired constructor(
 
     @AfterEach
     fun deleteOrder() {
-        orderRepository
+        orderLegacyRepository
             .deleteById(orderId)
             .block()
 
@@ -65,7 +65,7 @@ class OrderRepositoryCreateTest @Autowired constructor(
     @Test
     @DisplayName("[OrderRepository] 주문 생성 성공 테스트")
     fun createOrderSuccessTest() {
-        val order = Order(
+        val order = OrderLegacy(
             "create-order-test",
             "product-01",
             "sender1",
@@ -107,9 +107,9 @@ class OrderRepositoryCreateTest @Autowired constructor(
 //            }
 //            .verifyComplete()
 
-        orderRepository.save(order)
+        orderLegacyRepository.save(order)
             .flatMap {
-                orderRepository.findById(it.orderId)
+                orderLegacyRepository.findById(it.orderId)
             }
             .`as`(Transaction::withRollback)
             .`as`(StepVerifier::create)
@@ -122,7 +122,7 @@ class OrderRepositoryCreateTest @Autowired constructor(
     @Test
     @DisplayName("[OrderRepository] 주문 생성 실패 테스트")
     fun createOrderFailTest() {
-        val order = Order(
+        val order = OrderLegacy(
             "create-order-test",
             "product-01",
             "sender1",
@@ -144,9 +144,9 @@ class OrderRepositoryCreateTest @Autowired constructor(
 
         log.info("[OrderRepository] 주문 생성 실패 테스트")
 
-        orderRepository.save(order)
+        orderLegacyRepository.save(order)
             .flatMap {
-                orderRepository.findById(it.orderId)
+                orderLegacyRepository.findById(it.orderId)
             }
             .`as`(Transaction::withRollback)
             .`as`(StepVerifier::create)
@@ -161,7 +161,7 @@ class OrderRepositoryCreateTest @Autowired constructor(
     fun 주문_생성시_임의로_생성된_주문_아이디가_중복될_경우_해결_테스트() {
         log.info("[OrderRepository] 주문 생성 시 임의로 생성된 주문 아이디가 중복될 경우 해결 테스트")
 
-        val orderDtoForCreation = OrderDtoForCreation(
+        val orderDtoForCreation = OrderDtoForCreationLegacy(
             "test",
             "product-01",
             "sender1",
@@ -180,10 +180,10 @@ class OrderRepositoryCreateTest @Autowired constructor(
         randomIdGenerator.generate()
             .flatMap {
                 log.info(it)
-                val order = Order(
+                val order = OrderLegacy(
                     "test$num",
                     orderDtoForCreation.productId,
-                    orderDtoForCreation.senderId,
+                    orderDtoForCreation.userId,
                     orderDtoForCreation.senderName,
                     orderDtoForCreation.receiverName,
                     orderDtoForCreation.phone,
@@ -197,11 +197,11 @@ class OrderRepositoryCreateTest @Autowired constructor(
                 order.setAsNew()
                 num++
 
-                Mono.create<Order> { sink ->
+                Mono.create<OrderLegacy> { sink ->
                     sink.success(order)
                 }
             }
-            .flatMap(orderRepository::save)
+            .flatMap(orderLegacyRepository::save)
             .retry()
             .`as`(Transaction::withRollback)
             .subscribe()

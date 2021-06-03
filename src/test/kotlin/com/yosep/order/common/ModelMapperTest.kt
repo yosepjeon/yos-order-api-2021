@@ -1,8 +1,8 @@
 package com.yosep.order.common
 
-import com.yosep.order.data.dto.OrderDtoForCreation
-import com.yosep.order.data.entity.Order
-import com.yosep.order.order.data.repository.OrderRepositoryCreateTest
+import com.yosep.order.data.dto.OrderDtoForCreationLegacy
+import com.yosep.order.data.entity.OrderLegacy
+import com.yosep.order.order.data.repository.legacy.OrderLegacyRepositoryCreationTest
 import io.netty.util.internal.logging.Slf4JLoggerFactory
 import org.junit.jupiter.api.*
 import org.modelmapper.ModelMapper
@@ -14,7 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest
 class ModelMapperTest @Autowired constructor(
     val orderDtoForCreationToOrderMapper: ModelMapper
 ) {
-    val log = Slf4JLoggerFactory.getInstance(OrderRepositoryCreateTest::class.java)
+    val log = Slf4JLoggerFactory.getInstance(OrderLegacyRepositoryCreationTest::class.java)
 
     @BeforeEach
     fun printStart() {
@@ -31,7 +31,7 @@ class ModelMapperTest @Autowired constructor(
     fun orderDtoForCreation에서_order로_변환_테스트() {
         log.info("orderDto에서 order로 변환 테스트")
 
-        val orderDtoForCreation = OrderDtoForCreation(
+        val orderDtoForCreation = OrderDtoForCreationLegacy(
             "create-order-test",
             "product-01",
             "sender1",
@@ -46,7 +46,7 @@ class ModelMapperTest @Autowired constructor(
             "READY",
         )
 
-        val convertedOrder = orderDtoForCreationToOrderMapper.map(orderDtoForCreation, Order::class.java)
+        val convertedOrder = orderDtoForCreationToOrderMapper.map(orderDtoForCreation, OrderLegacy::class.java)
         log.info(convertedOrder.toString())
     }
 }

@@ -1,4 +1,4 @@
-package com.yosep.order.order.data.repository
+package com.yosep.order.order.data.repository.legacy
 
 import com.yosep.order.data.entity.OrderTest
 import com.yosep.order.data.repository.OrderTestRepository
@@ -11,7 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import reactor.test.StepVerifier
 
 @SpringBootTest
-class OrderTestRepositoryTest @Autowired constructor(
+class OrderLegacyTestRepositoryTest @Autowired constructor(
     private val orderTestRepository: OrderTestRepository
 ) {
     @BeforeEach

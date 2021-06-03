@@ -8,11 +8,17 @@ import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDateTime
 import javax.jdo.annotations.Column
 
-@Table("yos_order")
-data class Order (
+
+
+@Deprecated("더이상 사용하지 마시오.")
+@Table("yos_order_legacy")
+data class OrderLegacy(
     @Id
     @field:Column(length = 300)
     var orderId: String = "",
+
+    @field:Column(length = 300)
+    var productId: String = "",
 
     @field:Column(length = 50)
     var userId: String = "",
@@ -65,7 +71,7 @@ data class Order (
         return isNew || orderId == null
     }
 
-    fun setAsNew(): Order? {
+    fun setAsNew(): OrderLegacy? {
         isNew = true
         return this
     }

@@ -2,7 +2,6 @@ package com.yosep.order.common
 
 import com.yosep.order.data.entity.OrderTest
 import com.yosep.order.data.repository.OrderTestRepository
-import com.yosep.order.order.data.repository.OrderTestRepositoryTest
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

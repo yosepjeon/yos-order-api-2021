@@ -1,21 +1,20 @@
-package com.yosep.order.order.data.repository
+package com.yosep.order.order.data.repository.legacy
 
-import com.yosep.order.data.entity.Order
-import com.yosep.order.data.repository.OrderRepository
+import com.yosep.order.data.entity.OrderLegacy
+import com.yosep.order.data.repository.OrderLegacyRepository
 import io.netty.util.internal.logging.Slf4JLoggerFactory
 import org.junit.jupiter.api.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
 import java.time.LocalDateTime
 
 @SpringBootTest
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores::class)
-class OrderRepositoryReadTest @Autowired constructor(
-    private val orderRepository: OrderRepository,
+class OrderLegacyRepositoryReadTest @Autowired constructor(
+    private val orderLegacyRepository: OrderLegacyRepository,
 ) {
-    val log = Slf4JLoggerFactory.getInstance(OrderRepositoryCreateTest::class.java)
+    val log = Slf4JLoggerFactory.getInstance(OrderLegacyRepositoryCreationTest::class.java)
     var orderId = ""
 
     @BeforeEach
@@ -30,7 +29,7 @@ class OrderRepositoryReadTest @Autowired constructor(
 
     @AfterEach
     fun deleteOrder() {
-        orderRepository
+        orderLegacyRepository
             .deleteAll()
             .block()
 
@@ -42,7 +41,7 @@ class OrderRepositoryReadTest @Autowired constructor(
     fun 주문_조회_성공_테스트() {
         log.info("[OrderRepository] 주문 조회 성공 테스트")
 
-        StepVerifier.create(orderRepository.findById("test-0-0"))
+        StepVerifier.create(orderLegacyRepository.findById("test-0-0"))
             .expectSubscription()
             .consumeNextWith { order ->
                 log.info(order.toString())
@@ -56,7 +55,7 @@ class OrderRepositoryReadTest @Autowired constructor(
     fun 주문_조회_실패_테스트() {
         log.info("[OrderRepository] 주문 조회 실패 테스트")
 
-        StepVerifier.create(orderRepository.findById("test-0").defaultIfEmpty(Order()))
+        StepVerifier.create(orderLegacyRepository.findById("test-0").defaultIfEmpty(OrderLegacy()))
             .consumeNextWith { order ->
                 log.info(order.toString())
                 Assertions.assertEquals(true, order.orderId == "")
@@ -65,11 +64,11 @@ class OrderRepositoryReadTest @Autowired constructor(
     }
 
     @Test
-    @DisplayName("[OrderRepository] 유저 별 주문 조회 성공 테스트")
+    @DisplayName("[OrderRepository] 읽기전용 유저 별 주문 조회 성공 테스트")
     fun 유저별_주문_조회_성공_테스트() {
-        log.info("[OrderRepository] 유저 별 주문 조회 성공 테스트")
+        log.info("[OrderRepository] 읽기전용 유저 별 주문 조회 성공 테스트")
 
-        StepVerifier.create(orderRepository.findOrderBySenderId("sender1"))
+        StepVerifier.create(orderLegacyRepository.findOrdersBySenderId("sender1"))
             .thenConsumeWhile { order ->
                 log.info(order.toString())
                 order != null
@@ -79,7 +78,7 @@ class OrderRepositoryReadTest @Autowired constructor(
 
     fun createOrders(senderNum: Int) {
         for(i in 0..20) {
-            val order = Order(
+            val order = OrderLegacy(
                 "test-$senderNum-$i",
                 "product-01",
                 "sender$senderNum",
@@ -99,7 +98,7 @@ class OrderRepositoryReadTest @Autowired constructor(
 
             order.setAsNew()
 
-            orderRepository.save(order)
+            orderLegacyRepository.save(order)
                 .map {
                     orderId = it.orderId
                 }

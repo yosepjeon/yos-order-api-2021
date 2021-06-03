@@ -1,8 +1,5 @@
 package com.yosep.order.common.config
 
-import com.yosep.order.data.dto.CreatedOrderDto
-import com.yosep.order.data.dto.OrderDtoForCreation
-import com.yosep.order.data.entity.Order
 import org.modelmapper.ModelMapper
 import org.modelmapper.convention.MatchingStrategies
 import org.springframework.context.annotation.Bean

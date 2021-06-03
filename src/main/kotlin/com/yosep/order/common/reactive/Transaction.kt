@@ -15,7 +15,7 @@ import org.springframework.transaction.ReactiveTransaction
 class Transaction @Autowired constructor(rxtx: TransactionalOperator?) {
     companion object {
         private var rxtx: TransactionalOperator? = null
-        fun <T> withRollback(publisher: Mono<T?>?): Mono<T?> {
+        public fun <T> withRollback(publisher: Mono<T?>?): Mono<T?> {
             return rxtx!!.execute { tx: ReactiveTransaction ->
                 tx.setRollbackOnly()
                 publisher!!
@@ -23,7 +23,7 @@ class Transaction @Autowired constructor(rxtx: TransactionalOperator?) {
                 .next()
         }
 
-        fun <T> withRollback(publisher: Flux<T?>?): Flux<T> {
+        public fun <T> withRollback(publisher: Flux<T?>?): Flux<T> {
             return rxtx!!.execute { tx: ReactiveTransaction ->
                 tx.setRollbackOnly()
                 publisher!!

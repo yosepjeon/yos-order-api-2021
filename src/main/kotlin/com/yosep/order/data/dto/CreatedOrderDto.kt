@@ -1,6 +1,9 @@
 package com.yosep.order.data.dto
 
+import com.yosep.order.data.entity.Order
+import com.yosep.order.data.entity.OrderProduct
+
 data class CreatedOrderDto(
-    val productId: String= "",
-    val senderId: String = ""
+    val order: Order,
+    val orderProducts: List<OrderProduct>
 )
