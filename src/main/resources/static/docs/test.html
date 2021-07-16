@@ -443,7 +443,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sectionbody">
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /product/test/rest-doc-test HTTP/1.1
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /order/test/rest-doc-test HTTP/1.1
 Accept: application/json
 Host: salt.dev</code></pre>
 </div>
@@ -452,19 +452,23 @@ Host: salt.dev</code></pre>
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json
-Content-Length: 38
+Content-Length: 84
 
 {
-  "id" : "test",
-  "name" : "test"
+  "orderId" : "test",
+  "name" : "테스트",
+  "isNew" : false,
+  "id" : "test"
 }</code></pre>
 </div>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code>{
-  "id" : "test",
-  "name" : "test"
+  "orderId" : "test",
+  "name" : "테스트",
+  "isNew" : false,
+  "id" : "test"
 }</code></pre>
 </div>
 </div>

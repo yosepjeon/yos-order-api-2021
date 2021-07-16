@@ -6,15 +6,19 @@ import com.yosep.order.data.entity.OrderLegacy
 import com.yosep.order.data.entity.OrderTest
 import com.yosep.order.data.repository.OrderLegacyRepository
 import com.yosep.order.data.repository.OrderTestRepository
+import com.yosep.order.mq.producer.CommandToTestKafkaProducer
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
+import reactor.kafka.sender.SenderResult
+import reactor.kotlin.core.publisher.toMono
 import java.time.LocalDateTime
 
 @Service
 class OrderTestService @Autowired constructor(
     private val orderTestRepository: OrderTestRepository,
-    private val orderLegacyRepository: OrderLegacyRepository
+    private val orderLegacyRepository: OrderLegacyRepository,
+    private val commandToTestKafkaProducer: CommandToTestKafkaProducer
 ) {
     fun findProductById(productId: String):Mono<OrderTest> {
         return orderTestRepository.findById(productId)
@@ -40,6 +44,12 @@ class OrderTestService @Autowired constructor(
         )
 
         return Mono.empty()
+    }
+
+    fun sendMessage(): Mono<SenderResult<Int>> {
+        println("###")
+        return commandToTestKafkaProducer.sendMessages("test-topic",3)
+            .toMono()
     }
 
 //    fun findAllDsl(productName: String):Flux<ProductTest> {

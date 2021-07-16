@@ -8,6 +8,10 @@ import java.util.*
 
 @Component
 class RandomIdGenerator {
+    companion object {
+
+    }
+
     fun generate(): Mono<String> = Mono.create<String> {
         val now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"))
         val uuid = UUID.randomUUID().toString().replace("-", "").substring(0, 10)

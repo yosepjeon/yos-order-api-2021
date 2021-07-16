@@ -1,12 +1,12 @@
 package com.yosep.order.data.dto
 
 import com.yosep.order.data.vo.OrderProductDtoForCreation
-import javax.validation.constraints.NotBlank
-import javax.validation.constraints.NotEmpty
-import javax.validation.constraints.Size
+import javax.validation.constraints.*
 
 data class OrderDtoForCreation(
-    var orderId: String,
+    @field:NotNull
+    @field:Min(0)
+    val totalPrice: Long,
 
     @field:NotEmpty
     @field:Size(min = 1)

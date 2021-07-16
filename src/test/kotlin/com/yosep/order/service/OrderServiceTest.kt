@@ -3,6 +3,7 @@ package com.yosep.order.service
 import com.yosep.order.common.OrderGeneratorForTest
 import com.yosep.order.common.reactive.Transaction
 import com.yosep.order.data.dto.OrderDtoForCreation
+import com.yosep.order.data.repository.OrderRepository
 import com.yosep.order.data.vo.OrderProductDtoForCreation
 import io.netty.util.internal.logging.Slf4JLoggerFactory
 import org.junit.jupiter.api.*
@@ -14,7 +15,8 @@ import reactor.test.StepVerifier
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores::class)
 class OrderServiceTest @Autowired constructor(
     val orderGeneratorForTest: OrderGeneratorForTest,
-    val orderService: OrderService
+    val orderService: OrderService,
+    val orderRepository: OrderRepository
 ) {
     val log = Slf4JLoggerFactory.getInstance(OrderLegacyServiceTest::class.java)
 
@@ -25,6 +27,7 @@ class OrderServiceTest @Autowired constructor(
 
     @AfterEach
     fun printEnd() {
+        orderRepository.deleteAll().block()
         log.info("===================================================== END =====================================================")
     }
 
@@ -38,14 +41,15 @@ class OrderServiceTest @Autowired constructor(
         for (i in 0 until productCount) {
             val productInfoForCreation = OrderProductDtoForCreation(
                 i.toString(),
-                (Math.random() * 10).toInt()
+                (Math.random() * 10).toInt(),
+                "READY"
             )
 
             orderProducts.add(productInfoForCreation)
         }
 
         val orderDtoForCreation = OrderDtoForCreation(
-            "create-order-test",
+            1000000,
             orderProducts,
             "sender1",
             "요깨비",

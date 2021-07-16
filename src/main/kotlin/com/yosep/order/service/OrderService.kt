@@ -22,7 +22,6 @@ class OrderService @Autowired constructor(
     private val orderRepository: OrderRepository,
     private val orderProductRepository: OrderProductRepository
 ) {
-
     /*
     * 주문 생성
     * Logic:
@@ -94,6 +93,18 @@ class OrderService @Autowired constructor(
 
     }
 
+    /*
+    *
+     */
+    @Transactional(readOnly = false)
+    fun doOrder(orderDtoForCreation: OrderDtoForCreation) {
+
+//        createOrder(orderDtoForCreation)
+//            .flatMap { createdOrderDto:CreatedOrderDto ->
+//                Mono.empty<String>()
+//            }
+    }
+
     fun readOrderById(orderId: String): Mono<Order> {
         return orderRepository.findById(orderId)
     }
@@ -114,8 +125,29 @@ class OrderService @Autowired constructor(
 
     }
 
-    fun deleteOrder() {
+    fun deleteOrderById(orderId: String) {
+        orderRepository.deleteById(orderId)
+            .flatMap {
+                Mono.create<String> { monoSink ->
+                    monoSink.success(orderId)
+                }
+            }
+    }
 
+    fun cancelAll(orderId: String) {
+
+    }
+
+    @Transactional(readOnly = false)
+    fun deleteAllOrder() {
+        orderProductRepository.deleteAll()
+    }
+
+    @Transactional(readOnly = false)
+    fun cancelOrderProduct(orderProductIds: List<String>) {
+//        orderProductIds.forEach { orderProductId ->
+//
+//        }
     }
 
     fun processOrder() {

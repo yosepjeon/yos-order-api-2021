@@ -31,30 +31,6 @@ class OrderRepositoryCreationTest @Autowired constructor(
 
     @BeforeEach
     fun createOrder() {
-        val order = Order(
-            "test0",
-            "sender1",
-            "요깨비",
-            "이재훈",
-            "123123123",
-            "asdf",
-            "asdf",
-            "asdf",
-            "asdf",
-            "asdf",
-            "READY",
-            LocalDateTime.now(),
-            null,
-            null
-        )
-
-        order.setAsNew()
-
-        orderRepository.save(order)
-            .map {
-                orderId = it.orderId
-            }
-            .block()
 
         log.info("===================================================== START =====================================================")
     }
@@ -65,8 +41,17 @@ class OrderRepositoryCreationTest @Autowired constructor(
             .deleteAll()
             .block()
 
+        orderProductRepository
+            .deleteAll()
+            .block()
+
         log.info("===================================================== END =====================================================")
     }
+
+//    @Test
+//    fun a() {
+//        orderRepository.deleteAll().block();
+//    }
 
     @Test
     @DisplayName("[OrderRepository] 주문 생성 성공 테스트")
@@ -75,7 +60,7 @@ class OrderRepositoryCreationTest @Autowired constructor(
         val orderProducts = mutableListOf<OrderProductDtoForCreation>()
 
         val orderDtoForCreation = OrderDtoForCreation(
-            "create-order-test",
+            10000000,
             orderProducts,
             "sender1",
             "요깨비",
@@ -121,74 +106,74 @@ class OrderRepositoryCreationTest @Autowired constructor(
             .verifyComplete()
     }
 
-    @Test
-    @DisplayName("[OrderRepository] 주문상품 생성 성공 테스트")
-    fun 주문상품_생성_성공_테스트() {
-        log.info("[OrderRepository] 주문상품 생성 성공 테스트")
-
-        val orderDtoForCreation = OrderDtoForCreation(
-            "create-order-test",
-            listOf(),
-            "sender1",
-            "요깨비",
-            "이재훈",
-            "123123123",
-            "asdf",
-            "asdf",
-            "asdf",
-            "asdf",
-            "asdf",
-            "READY",
-        )
-
-        randomIdGenerator.generate()
-            .flatMap { orderId ->
-                val order = Order(
-                    orderId,
-                    orderDtoForCreation.userId,
-                    orderDtoForCreation.senderName,
-                    orderDtoForCreation.receiverName,
-                    orderDtoForCreation.phone,
-                    orderDtoForCreation.postCode,
-                    orderDtoForCreation.roadAddr,
-                    orderDtoForCreation.jibunAddr,
-                    orderDtoForCreation.extraAddr,
-                    orderDtoForCreation.detailAddr,
-                    orderDtoForCreation.orderState,
-                )
-                order.setAsNew()
-
-                Mono.create<Order> { sink ->
-                    sink.success(order)
-                }
-            }
-            .flatMap(orderRepository::save)
-            .flatMap { order ->
-                val orderProducts = mutableListOf<OrderProduct>()
-                val productCount = (Math.random() * 10).toInt() + 1
-//                val orderId = "order-product-test"
-                for (i in 0 until productCount) {
-                    val orderProduct = OrderProduct(
-                        order.orderId + i,
-                        order.orderId,
-                        "product",
-                        productCount,
-                        OrderProductState.READY.value
-                    )
-                    orderProduct.setAsNew()
-
-                    orderProducts.add(orderProduct)
-                }
-
-                orderProductRepository.saveAll(orderProducts.asIterable())
-                    .collectList()
-            }
-            .`as`(Transaction::withRollback)
-            .`as`(StepVerifier::create)
-            .assertNext { orderProducts ->
-                log.info(orderProducts.toString())
-                Assertions.assertEquals(true, orderProducts.size > 0)
-            }
-            .verifyComplete()
-    }
+//    @Test
+//    @DisplayName("[OrderRepository] 주문상품 생성 성공 테스트")
+//    fun 주문상품_생성_성공_테스트() {
+//        log.info("[OrderRepository] 주문상품 생성 성공 테스트")
+//
+//        val orderDtoForCreation = OrderDtoForCreation(
+//            "create-order-test",
+//            listOf(),
+//            "sender1",
+//            "요깨비",
+//            "이재훈",
+//            "123123123",
+//            "asdf",
+//            "asdf",
+//            "asdf",
+//            "asdf",
+//            "asdf",
+//            "READY",
+//        )
+//
+//        randomIdGenerator.generate()
+//            .flatMap { orderId ->
+//                val order = Order(
+//                    orderId,
+//                    orderDtoForCreation.userId,
+//                    orderDtoForCreation.senderName,
+//                    orderDtoForCreation.receiverName,
+//                    orderDtoForCreation.phone,
+//                    orderDtoForCreation.postCode,
+//                    orderDtoForCreation.roadAddr,
+//                    orderDtoForCreation.jibunAddr,
+//                    orderDtoForCreation.extraAddr,
+//                    orderDtoForCreation.detailAddr,
+//                    orderDtoForCreation.orderState,
+//                )
+//                order.setAsNew()
+//
+//                Mono.create<Order> { sink ->
+//                    sink.success(order)
+//                }
+//            }
+//            .flatMap(orderRepository::save)
+//            .flatMap { order ->
+//                val orderProducts = mutableListOf<OrderProduct>()
+//                val productCount = (Math.random() * 10).toInt() + 1
+////                val orderId = "order-product-test"
+//                for (i in 0 until productCount) {
+//                    val orderProduct = OrderProduct(
+//                        order.orderId + i,
+//                        order.orderId,
+//                        "product",
+//                        productCount,
+//                        OrderProductState.READY.value
+//                    )
+//                    orderProduct.setAsNew()
+//
+//                    orderProducts.add(orderProduct)
+//                }
+//
+//                orderProductRepository.saveAll(orderProducts.asIterable())
+//                    .collectList()
+//            }
+//            .`as`(Transaction::withRollback)
+//            .`as`(StepVerifier::create)
+//            .assertNext { orderProducts ->
+//                log.info(orderProducts.toString())
+//                Assertions.assertEquals(true, orderProducts.size > 0)
+//            }
+//            .verifyComplete()
+//    }
 }

@@ -13,9 +13,10 @@ class OrderRouter constructor(
 ) {
     @Bean
     fun testRouteFunction() = nest(
-        path("/product/test"),
+        path("/order/test"),
         router {
             listOf(
+                POST("/kafka-test", orderTestHandler::kafkaTest),
                 GET("/connection-test",orderTestHandler::connectionTest),
                 GET("/rest-doc-test", orderTestHandler::restDocTest)
             )

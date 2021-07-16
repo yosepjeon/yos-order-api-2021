@@ -26,4 +26,17 @@ class OrderTestHandler constructor(
                 orderTestService.findProductById("test")
             )
     }
+
+    fun kafkaTest(req: ServerRequest): Mono<ServerResponse> {
+        orderTestService.sendMessage().subscribe()
+
+        return ok()
+            .body(
+                Mono.just(1)
+//                Mono.create {
+//                    it.success(1)
+//                }
+//                orderTestService.sendMessage()
+            )
+    }
 }
