@@ -42,6 +42,21 @@ class ReactiveRedisTest @Autowired constructor(
     }
 
     @Test
+    @DisplayName("[Reactive Redis] 중복된 Key set")
+    fun 중복된_Key_Set() {
+        log.info("[Reactive Redis] 중복된 Key set")
+        StepVerifier.create(redisTemplate.opsForValue().set("a","1")
+            .flatMap {
+                redisTemplate.opsForValue().setIfAbsent("a","2")
+            })
+            .assertNext {
+                log.info("$it")
+            }
+            .verifyComplete()
+    }
+
+
+    @Test
     @DisplayName("[Reactive Redis] 정수 값 넣고빼기 성공 테스트")
     fun 정수_값_넣고빼기_성공_테스트() {
         log.info("[Reactive Redis] 정수 값 넣기 성공 테스트")

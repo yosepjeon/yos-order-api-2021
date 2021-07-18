@@ -36,7 +36,7 @@ class ProductStep(
         return Mono.empty()
     }
 
-    override fun revert(t: OrderDtoForCreation): Mono<CreatedOrderDto> {
+    override fun revert(): Mono<CreatedOrderDto> {
         return Mono.empty()
     }
 

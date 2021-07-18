@@ -33,41 +33,50 @@ class OrderOrchestratorByWebclient @Autowired constructor(
     fun order(orderDtoForCreation: OrderDtoForCreation): Mono<CreatedOrderDto> {
 
         lateinit var orderEventId: String
-        lateinit var orderWorkflow: OrderWorkflow<Any, OrderDtoForCreation>
+        lateinit var orderWorkflow: OrderWorkflow
+//        lateinit var orderWorkflow: Workflow<OrderDtoForCreation, CreatedOrderDto>
 
-        return createOrderWorkFlow()
+        return createOrderWorkFlow(orderDtoForCreation)
             .flatMap { createdOrderWorkFlow ->
-                orderWorkflow = createdOrderWorkFlow as OrderWorkflow<Any, OrderDtoForCreation>
-
-                orderWorkflow.processFlow(orderDtoForCreation)
+                orderWorkflow = createdOrderWorkFlow as OrderWorkflow
+                orderWorkflow.processFlow()
             }
 //            .flatMap(orderWorkflow.processFlow(orderDtoForCreation))
     }
 
-    private fun createOrderWorkFlow(): Mono<OrderWorkflow<*, *>> {
+    private fun createOrderWorkFlow(orderDtoForCreation: OrderDtoForCreation): Mono<OrderWorkflow> {
         lateinit var orderEventId: String
-        lateinit var orderWorkflow: Workflow<Any, OrderDtoForCreation>
+//        lateinit var orderWorkflow: Workflow<OrderDtoForCreation, CreatedOrderDto>
+        lateinit var orderWorkflow: OrderWorkflow
 
         return randomIdGenerator.generate()
             .flatMap { createdOrderEventId ->
                 orderEventId = createdOrderEventId
 //                redisTemplate.hasKey(createdOrderEventId)
-                orderWorkflow = OrderWorkflow<Any, OrderDtoForCreation>(
+                orderWorkflow = OrderWorkflow(
                     redisTemplate = redisTemplate,
                     orderService = orderService,
                     randomIdGenerator = randomIdGenerator,
+                    orderDtoForCreation = orderDtoForCreation,
                     id = orderEventId
                 )
 
-                val paredOrderWorkFlow = objectMapper.writeValueAsString(orderWorkflow)
-                redisTemplate.opsForValue().set(orderEventId, paredOrderWorkFlow)
+                val parsedOrderWorkFlow = objectMapper.writeValueAsString(orderWorkflow)
+                println(parsedOrderWorkFlow)
+                val workflow = objectMapper.readValue(parsedOrderWorkFlow, Workflow::class.java)
+                println("[paresedOrderWorkFlow]")
+                println("id: ${workflow.id}")
+                println("type: ${workflow.type}")
+
+                redisTemplate.opsForValue().setIfAbsent(orderEventId, parsedOrderWorkFlow)
             }
             .flatMap { result ->
                 if (!result) {
                     throw DuplicateKeyException()
                 } else {
-                    Mono.create<OrderWorkflow<*, *>> { monoSink ->
-                        monoSink.success(orderWorkflow as OrderWorkflow<Any, OrderDtoForCreation>)
+
+                    Mono.create<OrderWorkflow> { monoSink ->
+                        monoSink.success(orderWorkflow)
                     }
                 }
             }

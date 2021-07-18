@@ -26,12 +26,12 @@ import java.time.LocalDateTime
 //    fun getType(): String = this.type
 //}
 
-open class Workflow<T,R>(
-    protected val id: String,
-    protected val steps: MutableList<WorkflowStep<T,R>>,
-    protected val type: String,
-    protected var state: String = "READY",
-    protected val createdDate: LocalDateTime = LocalDateTime.now()
+open class Workflow<T, R>(
+    val id: String,
+    val steps: MutableList<WorkflowStep<T, R>>,
+    val type: String,
+    var state: String = "READY",
+    val createdDate: LocalDateTime = LocalDateTime.now()
 ) {
 //    fun getId():String = this.id
 //    fun getSteps(): MutableList<WorkflowStep<T,R>> = this.steps

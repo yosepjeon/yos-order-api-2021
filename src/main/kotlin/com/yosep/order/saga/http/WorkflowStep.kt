@@ -18,5 +18,5 @@ open class WorkflowStep<T,R>(
     open fun getStepType(): String = this.stepType
 
     open fun process(t: T): Mono<R> = Mono.empty()
-    open fun revert(t: T): Mono<R> = Mono.empty()
+    open fun revert(): Mono<R> = Mono.empty()
 }
