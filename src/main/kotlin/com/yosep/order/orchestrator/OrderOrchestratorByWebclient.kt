@@ -54,9 +54,13 @@ class OrderOrchestratorByWebclient @Autowired constructor(
                 orderEventId = createdOrderEventId
 //                redisTemplate.hasKey(createdOrderEventId)
                 orderWorkflow = OrderWorkflow(
+                    paymentWebclient = paymentWebclient,
+                    productWebclient = productWebclient,
+                    couponWebclient = couponWebclient,
                     redisTemplate = redisTemplate,
                     orderService = orderService,
                     randomIdGenerator = randomIdGenerator,
+                    objectMapper= objectMapper,
                     orderDtoForCreation = orderDtoForCreation,
                     id = orderEventId
                 )

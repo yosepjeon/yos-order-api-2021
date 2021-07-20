@@ -13,18 +13,20 @@ import com.yosep.order.saga.http.WorkflowStepStatus
 import org.springframework.web.reactive.function.client.WebClient
 
 import com.yosep.order.saga.http.WorkflowStep
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.reactive.function.BodyInserter
 
 
 class ProductStep(
     @JsonIgnore
+    @Autowired
     private val webClient: WebClient? = null,
     private val orderProductsDtoForCreation: List<OrderProductDtoForCreation> = emptyList(),
     stepType: String = "PRODUCT"
 ) : WorkflowStep<OrderDtoForCreation, CreatedOrderDto>(
     stepType
 ) {
-    override fun process(t: OrderDtoForCreation): Mono<CreatedOrderDto> {
+    override fun process(orderDtoForCreation: OrderDtoForCreation): Mono<CreatedOrderDto> {
         webClient!!
             .post()
             .uri("/test")
