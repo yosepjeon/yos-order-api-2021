@@ -102,7 +102,8 @@ class ReactiveRedisTest @Autowired constructor(
             val productInfoForCreation = OrderProductDtoForCreation(
                 i.toString(),
                 (Math.random() * 10).toInt(),
-                "READY"
+                "READY",
+                10000
             )
 
             orderProducts.add(productInfoForCreation)

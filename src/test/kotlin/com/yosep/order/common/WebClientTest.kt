@@ -1,12 +1,12 @@
 //package com.yosep.order.common
 //
+//import com.yosep.order.data.dto.OrderDtoForCreation
+//import com.yosep.order.data.dto.ProductStepDtoForCreation
 //import com.yosep.order.data.entity.OrderTest
 //import com.yosep.order.data.repository.OrderTestRepository
+//import com.yosep.order.data.vo.OrderProductDtoForCreation
 //import io.netty.util.internal.logging.Slf4JLoggerFactory
-//import org.junit.jupiter.api.AfterEach
-//import org.junit.jupiter.api.Assertions
-//import org.junit.jupiter.api.BeforeEach
-//import org.junit.jupiter.api.Test
+//import org.junit.jupiter.api.*
 //import org.junit.jupiter.api.extension.ExtendWith
 //import org.springframework.beans.factory.annotation.Autowired
 //import org.springframework.beans.factory.annotation.Qualifier
@@ -36,14 +36,17 @@
 //
 //@SpringBootTest
 //@ExtendWith(RestDocumentationExtension::class, SpringExtension::class)
+//@DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores::class)
 ////@AutoConfigureWebTestClient
 //class WebClientTest @Autowired constructor(
 //    @Qualifier("product-command")
 //    private val productCommandWebClient: WebClient,
+//    @Qualifier("product")
+//    private val productWebClient: WebClient,
 //    private val orderTestRepository: OrderTestRepository,
 //    private val context: ApplicationContext
 //) {
-//    val log = Slf4JLoggerFactory.getInstance(WebClient::class.java)
+//    val log = Slf4JLoggerFactory.getInstance(WebClientTest::class.java)
 //    private lateinit var webTestClient: WebTestClient
 //
 //    @BeforeEach
@@ -99,6 +102,61 @@
 //            .assertNext {
 //                log.info("result: $it")
 //                Assertions.assertEquals("Test 입니다.", it)
+//            }
+//            .verifyComplete()
+//    }
+//
+//    @Test
+//    @DisplayName("[Webclient] product step webclient test")
+//    fun productStepWebclientTest() {
+//        log.info("[Webclient] product step webclient test")
+//
+//        val productCount = (Math.random() * 10).toInt() + 1
+//        val orderProducts = mutableListOf<OrderProductDtoForCreation>()
+//
+//        for (i in 0 until productCount) {
+//            val productInfoForCreation = OrderProductDtoForCreation(
+//                i.toString(),
+//                (Math.random() * 10).toInt(),
+//                "READY",
+//                10000
+//            )
+//
+//            orderProducts.add(productInfoForCreation)
+//        }
+//
+//        val orderDtoForCreation = OrderDtoForCreation(
+//            1000000,
+//            orderProducts,
+//            "sender1",
+//            "요깨비",
+//            "이재훈",
+//            "123123123",
+//            "asdf",
+//            "asdf",
+//            "asdf",
+//            "asdf",
+//            "asdf",
+//            "READY",
+//        )
+//
+//        val productStepDtoForCreation= ProductStepDtoForCreation(
+//            orderDtoForCreation.totalPrice,
+//            orderDtoForCreation.orderProductDtos
+//        )
+//
+//        productWebClient
+//            .post()
+//            .uri("/test")
+//            .contentType(MediaType.APPLICATION_JSON)
+//            .accept(MediaType.APPLICATION_JSON)
+//            .bodyValue(productStepDtoForCreation)
+//            .retrieve()
+//            .bodyToMono(ProductStepDtoForCreation::class.java)
+//            .`as`(StepVerifier::create)
+//            .assertNext {
+//                log.info("result: $it")
+////                Assertions.assertEquals("product webclient test", it)
 //            }
 //            .verifyComplete()
 //    }

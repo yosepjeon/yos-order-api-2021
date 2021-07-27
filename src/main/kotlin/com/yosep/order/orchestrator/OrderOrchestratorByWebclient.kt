@@ -21,7 +21,7 @@ import java.time.LocalDateTime
 class OrderOrchestratorByWebclient @Autowired constructor(
     @Qualifier("payment-command")
     private val paymentWebclient: WebClient,
-    @Qualifier("product-command")
+    @Qualifier("product")
     private val productWebclient: WebClient,
     @Qualifier("coupon-command")
     private val couponWebclient: WebClient,

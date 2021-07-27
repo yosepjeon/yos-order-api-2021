@@ -27,10 +27,119 @@ import java.util.function.Function
 class WebClientConfig constructor(
     val log: Logger = LoggerFactory.getLogger(WebClientConfig::class.java)
 ) {
+    @Bean
+    @Qualifier("product")
+    fun productClient(@Value("\${yos.endpoints.products}") endPoint: String): WebClient {
+        val exchangeStrategies = getExchangeStrategies()
+
+        return WebClient.builder()
+            .clientConnector(
+                ReactorClientHttpConnector(
+                    HttpClient
+                        .create()
+                        .tcpConfiguration(
+                            Function { client: TcpClient ->
+                                client.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 120000)
+                                    .doOnConnected { conn: Connection ->
+                                        conn.addHandlerLast(ReadTimeoutHandler(180))
+                                            .addHandlerLast(WriteTimeoutHandler(180))
+                                    }
+                            }
+                        )
+                )
+            )
+            .exchangeStrategies(exchangeStrategies)
+            .filter(ExchangeFilterFunction.ofRequestProcessor { clientRequest: ClientRequest ->
+                log.debug("Request: {} {}", clientRequest.method(), clientRequest.url())
+                clientRequest.headers()
+                    .forEach { name: String?, values: List<String?> ->
+                        values.forEach(
+                            Consumer { value: String? ->
+                                log.debug(
+                                    "{} : {}",
+                                    name,
+                                    value
+                                )
+                            })
+                    }
+                Mono.just(clientRequest)
+            })
+            .filter(ExchangeFilterFunction.ofResponseProcessor { clientResponse: ClientResponse ->
+                clientResponse.headers().asHttpHeaders()
+                    .forEach { name: String?, values: List<String?> ->
+                        values.forEach(
+                            Consumer { value: String? ->
+                                log.debug(
+                                    "{} : {}",
+                                    name,
+                                    value
+                                )
+                            })
+                    }
+                Mono.just(clientResponse)
+            })
+            .baseUrl(endPoint)
+            .build()
+    }
 
     @Bean
     @Qualifier("product-command")
     fun productCommandClient(@Value("\${yos.endpoints.product-command}") endPoint: String): WebClient {
+        val exchangeStrategies = getExchangeStrategies()
+
+        return WebClient.builder()
+            .clientConnector(
+                ReactorClientHttpConnector(
+                    HttpClient
+                        .create()
+                        .tcpConfiguration(
+                            Function { client: TcpClient ->
+                                client.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 120000)
+                                    .doOnConnected { conn: Connection ->
+                                        conn.addHandlerLast(ReadTimeoutHandler(180))
+                                            .addHandlerLast(WriteTimeoutHandler(180))
+                                    }
+                            }
+                        )
+                )
+            )
+            .exchangeStrategies(exchangeStrategies)
+            .filter(ExchangeFilterFunction.ofRequestProcessor { clientRequest: ClientRequest ->
+                log.debug("Request: {} {}", clientRequest.method(), clientRequest.url())
+                clientRequest.headers()
+                    .forEach { name: String?, values: List<String?> ->
+                        values.forEach(
+                            Consumer { value: String? ->
+                                log.debug(
+                                    "{} : {}",
+                                    name,
+                                    value
+                                )
+                            })
+                    }
+                Mono.just(clientRequest)
+            })
+            .filter(ExchangeFilterFunction.ofResponseProcessor { clientResponse: ClientResponse ->
+                clientResponse.headers().asHttpHeaders()
+                    .forEach { name: String?, values: List<String?> ->
+                        values.forEach(
+                            Consumer { value: String? ->
+                                log.debug(
+                                    "{} : {}",
+                                    name,
+                                    value
+                                )
+                            })
+                    }
+                Mono.just(clientResponse)
+            })
+            .baseUrl(endPoint)
+            .build()
+    }
+
+    @Bean
+    @Qualifier("product-query")
+    fun productQueryClient(@Value("\${yos.endpoints.product-query}") endPoint: String): WebClient {
         val exchangeStrategies = getExchangeStrategies()
 
         return WebClient.builder()

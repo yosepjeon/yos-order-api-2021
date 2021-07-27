@@ -46,7 +46,6 @@ class OrderWorkflow(
         var createdOrderDto: CreatedOrderDto
 
         return orderStep.process(orderDtoForCreation)
-            // update
             .flatMap { createdOrderDto ->
                 this.steps.add(orderStep)
                 update()

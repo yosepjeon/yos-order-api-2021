@@ -90,7 +90,8 @@ class OrderOrchestratorByWebclientTest @Autowired constructor(
             val productInfoForCreation = OrderProductDtoForCreation(
                 i.toString(),
                 (Math.random() * 10).toInt(),
-                "READY"
+                "READY",
+                100000
             )
 
             orderProducts.add(productInfoForCreation)
