@@ -23,8 +23,8 @@ class OrderGeneratorForTest @Autowired constructor(
                 val productInfoForCreation = OrderProductDtoForCreation(
                     i.toString(),
                     (Math.random() * 10).toInt(),
-                    "READY",
-                    10000
+                    10000,
+                    "READY"
                 )
 
                 productInfoForCreations.add(productInfoForCreation)
@@ -33,6 +33,8 @@ class OrderGeneratorForTest @Autowired constructor(
             val orderDtoForCreation = OrderDtoForCreation(
                 100000000,
                 productInfoForCreations,
+                emptyList(),
+                emptyList(),
                 "sender1",
                 "요깨비",
                 "이재훈",

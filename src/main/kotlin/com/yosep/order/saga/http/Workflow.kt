@@ -28,7 +28,7 @@ import java.time.LocalDateTime
 
 open class Workflow<T, R>(
     val id: String,
-    val steps: MutableList<WorkflowStep<T, R>>,
+    val steps: MutableList<WorkflowStep<Any>>,
     val type: String,
     var state: String = "READY",
     val createdDate: LocalDateTime = LocalDateTime.now()

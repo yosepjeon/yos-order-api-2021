@@ -62,6 +62,8 @@ class OrderRepositoryCreationTest @Autowired constructor(
         val orderDtoForCreation = OrderDtoForCreation(
             10000000,
             orderProducts,
+            emptyList(),
+            emptyList(),
             "sender1",
             "요깨비",
             "이재훈",

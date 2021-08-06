@@ -3,6 +3,7 @@ package com.yosep.order.order.orchestrator
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.yosep.order.common.exception.DuplicateKeyException
 import com.yosep.order.common.exception.TestException
+import com.yosep.order.common.reactive.Transaction
 import com.yosep.order.data.dto.OrderDtoForCreation
 import com.yosep.order.data.vo.OrderProductDtoForCreation
 import com.yosep.order.orchestrator.OrderOrchestratorByWebclient
@@ -90,8 +91,8 @@ class OrderOrchestratorByWebclientTest @Autowired constructor(
             val productInfoForCreation = OrderProductDtoForCreation(
                 i.toString(),
                 (Math.random() * 10).toInt(),
-                "READY",
-                100000
+                100000,
+                "READY"
             )
 
             orderProducts.add(productInfoForCreation)
@@ -100,6 +101,8 @@ class OrderOrchestratorByWebclientTest @Autowired constructor(
         val orderDtoForCreation = OrderDtoForCreation(
             1000000,
             orderProducts,
+            emptyList(),
+            emptyList(),
             "sender1",
             "요깨비",
             "이재훈",
@@ -124,8 +127,10 @@ class OrderOrchestratorByWebclientTest @Autowired constructor(
 //            .verifyComplete()
 
         orderOrchestratorByWebclient.order(orderDtoForCreation)
+            .`as`(Transaction::withRollback)
             .`as`(StepVerifier::create)
             .assertNext { createdOrderDto ->
+                log.info("최종 결과")
                 log.info(createdOrderDto.toString())
             }
             .verifyComplete()

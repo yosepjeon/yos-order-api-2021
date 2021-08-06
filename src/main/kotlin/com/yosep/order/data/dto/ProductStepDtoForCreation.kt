@@ -1,6 +1,7 @@
 package com.yosep.order.data.dto
 
 import com.yosep.order.data.vo.OrderProductDtoForCreation
+import org.springframework.hateoas.RepresentationModel
 import javax.validation.constraints.Min
 import javax.validation.constraints.NotEmpty
 import javax.validation.constraints.NotNull
@@ -14,4 +15,7 @@ data class ProductStepDtoForCreation(
     @field:NotEmpty
     @field:Size(min = 1)
     val orderProductDtos: List<OrderProductDtoForCreation>,
-)
+
+    @field:NotEmpty
+    var state: String = "READY"
+): RepresentationModel<ProductStepDtoForCreation>()

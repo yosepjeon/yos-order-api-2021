@@ -60,17 +60,14 @@ class OrderOrchestratorByWebclient @Autowired constructor(
                     redisTemplate = redisTemplate,
                     orderService = orderService,
                     randomIdGenerator = randomIdGenerator,
-                    objectMapper= objectMapper,
+                    objectMapper = objectMapper,
                     orderDtoForCreation = orderDtoForCreation,
                     id = orderEventId
                 )
 
                 val parsedOrderWorkFlow = objectMapper.writeValueAsString(orderWorkflow)
-                println(parsedOrderWorkFlow)
+//                println(parsedOrderWorkFlow)
                 val workflow = objectMapper.readValue(parsedOrderWorkFlow, Workflow::class.java)
-                println("[paresedOrderWorkFlow]")
-                println("id: ${workflow.id}")
-                println("type: ${workflow.type}")
 
                 redisTemplate.opsForValue().setIfAbsent(orderEventId, parsedOrderWorkFlow)
             }

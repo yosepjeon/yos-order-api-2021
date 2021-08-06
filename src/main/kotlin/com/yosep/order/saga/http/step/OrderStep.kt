@@ -5,6 +5,7 @@ import com.yosep.order.common.data.RandomIdGenerator
 import com.yosep.order.data.dto.CreatedOrderDto
 import com.yosep.order.data.dto.OrderDtoForCreation
 import com.yosep.order.saga.http.WorkflowStep
+import com.yosep.order.saga.http.annotation.SagaStep
 import com.yosep.order.service.OrderService
 import reactor.core.publisher.Mono
 
@@ -13,20 +14,25 @@ class OrderStep(
     private var orderService: OrderService? = null,
     @JsonIgnore
     private var randomIdGenerator: RandomIdGenerator? = null,
+    val orderDtoForCreation: OrderDtoForCreation,
+    var orderId: String = "",
     stepType: String = "ORDER",
     state: String = "READY"
-) : WorkflowStep<OrderDtoForCreation, CreatedOrderDto>(
+) : WorkflowStep<CreatedOrderDto>(
     stepType,
     state
 ) {
     private lateinit var createdOrderDto: CreatedOrderDto
 
-    override fun process(orderDtoForCreation: OrderDtoForCreation): Mono<CreatedOrderDto> {
+    @SagaStep
+    override fun process(): Mono<CreatedOrderDto> {
         this.state = "PENDING"
 
         return orderService!!.createOrder(orderDtoForCreation)
             .flatMap { createdOrderDto ->
                 this.createdOrderDto = createdOrderDto
+
+                orderId = this.createdOrderDto.order.orderId
 
                 this.state = "COMP"
                 Mono.create<CreatedOrderDto> { monoSink ->
@@ -36,6 +42,7 @@ class OrderStep(
     }
 
     override fun revert(): Mono<CreatedOrderDto> {
+        println("call order step revert")
 
         return Mono.empty()
     }

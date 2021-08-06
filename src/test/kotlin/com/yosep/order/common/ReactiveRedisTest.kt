@@ -102,8 +102,8 @@ class ReactiveRedisTest @Autowired constructor(
             val productInfoForCreation = OrderProductDtoForCreation(
                 i.toString(),
                 (Math.random() * 10).toInt(),
-                "READY",
-                10000
+                10000,
+                "READY"
             )
 
             orderProducts.add(productInfoForCreation)
@@ -112,6 +112,8 @@ class ReactiveRedisTest @Autowired constructor(
         val orderDtoForCreation = OrderDtoForCreation(
             1000000,
             orderProducts,
+            emptyList(),
+            emptyList(),
             "sender1",
             "요깨비",
             "이재훈",
@@ -124,8 +126,8 @@ class ReactiveRedisTest @Autowired constructor(
             "READY",
         )
 
-        val orderStep = OrderStep(orderService, randomIdGenerator, "READY")
-        orderStep.process(orderDtoForCreation)
+        val orderStep = OrderStep(orderService, randomIdGenerator, orderDtoForCreation)
+        orderStep.process()
 
     }
 

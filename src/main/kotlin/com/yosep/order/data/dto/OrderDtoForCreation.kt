@@ -1,6 +1,8 @@
 package com.yosep.order.data.dto
 
+import com.yosep.order.data.vo.OrderProductDiscountCouponDto
 import com.yosep.order.data.vo.OrderProductDtoForCreation
+import com.yosep.order.data.vo.OrderTotalDiscountCouponDto
 import javax.validation.constraints.*
 
 data class OrderDtoForCreation(
@@ -10,7 +12,15 @@ data class OrderDtoForCreation(
 
     @field:NotEmpty
     @field:Size(min = 1)
-    val orderProductDtos: List<OrderProductDtoForCreation>,
+    val orderProductDtos: List<OrderProductDtoForCreation> = emptyList(),
+
+    @field:NotEmpty
+    @field:Size(min = 1)
+    val orderProductDiscountCouponDtos: List<OrderProductDiscountCouponDto> = emptyList(),
+
+    @field:NotEmpty
+    @field:Size(min = 0)
+    val orderTotalDiscountCouponDtos: List<OrderTotalDiscountCouponDto> = emptyList(),
 
     @field:NotBlank
     @field:Size(max = 50)

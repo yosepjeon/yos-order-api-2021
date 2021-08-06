@@ -3,6 +3,7 @@ package com.yosep.order.saga.http.step
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.yosep.order.data.dto.CreatedOrderDto
 import com.yosep.order.data.dto.OrderDtoForCreation
+import com.yosep.order.data.dto.ProductStepDtoForCreation
 import com.yosep.order.data.vo.OrderProductDtoForCreation
 import org.springframework.web.reactive.function.BodyInserters
 
@@ -13,32 +14,53 @@ import com.yosep.order.saga.http.WorkflowStepStatus
 import org.springframework.web.reactive.function.client.WebClient
 
 import com.yosep.order.saga.http.WorkflowStep
+import com.yosep.order.saga.http.annotation.SagaStep
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.BodyInserter
 
 
 class ProductStep(
     @JsonIgnore
-    @Autowired
     private val webClient: WebClient? = null,
-    private val orderProductsDtoForCreation: List<OrderProductDtoForCreation> = emptyList(),
-    stepType: String = "PRODUCT"
-) : WorkflowStep<OrderDtoForCreation, CreatedOrderDto>(
-    stepType
+//    private val orderProductsDtoForCreation: List<OrderProductDtoForCreation> = emptyList(),
+    var productStepDtoForCreation: ProductStepDtoForCreation,
+    stepType: String = "PRODUCT",
+    state: String = "READY"
+) : WorkflowStep<ProductStepDtoForCreation>(
+    stepType,
+    state
 ) {
-    override fun process(orderDtoForCreation: OrderDtoForCreation): Mono<CreatedOrderDto> {
-        webClient!!
+    @SagaStep
+    override fun process(): Mono<ProductStepDtoForCreation> {
+        this.state = "PENDING"
+        this.productStepDtoForCreation.state = "PENDING"
+
+        return webClient!!
             .post()
-            .uri("/test")
-            .body(BodyInserters.fromValue(""))
+            .uri("/order-saga")
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)
+            .bodyValue(productStepDtoForCreation)
             .retrieve()
-            .bodyToMono(String::class.java)
+            .bodyToMono(ProductStepDtoForCreation::class.java)
+            .doOnNext { productStepDtoForCreation ->
+                this.productStepDtoForCreation = productStepDtoForCreation
 
+                if(this.productStepDtoForCreation.state == "FAIL") {
+                    this.state = "FAIL"
+                }else {
+                    this.state = "COMP"
+                }
 
-        return Mono.empty()
+                println("[ProductStep]")
+                println(productStepDtoForCreation)
+            }
     }
 
-    override fun revert(): Mono<CreatedOrderDto> {
+    override fun revert(): Mono<ProductStepDtoForCreation> {
+        println("call product step revert")
+
         return Mono.empty()
     }
 
