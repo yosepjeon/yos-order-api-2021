@@ -18,6 +18,8 @@ import com.yosep.order.saga.http.annotation.SagaStep
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.BodyInserter
+import reactor.core.publisher.Flux
+import reactor.kotlin.core.publisher.toFlux
 
 
 class ProductStep(
@@ -35,6 +37,7 @@ class ProductStep(
     override fun process(): Mono<ProductStepDtoForCreation> {
         this.state = "PENDING"
         this.productStepDtoForCreation.state = "PENDING"
+//        WebClientResponseException.GatewayTimeout
 
         return webClient!!
             .post()
@@ -44,6 +47,7 @@ class ProductStep(
             .bodyValue(productStepDtoForCreation)
             .retrieve()
             .bodyToMono(ProductStepDtoForCreation::class.java)
+//            .retryWhen()
             .doOnNext { productStepDtoForCreation ->
                 this.productStepDtoForCreation = productStepDtoForCreation
 
@@ -59,9 +63,11 @@ class ProductStep(
     }
 
     override fun revert(): Mono<ProductStepDtoForCreation> {
-        println("call product step revert")
 
-        return Mono.empty()
+        return Mono.create { monoSink ->
+
+            monoSink.success()
+        }
     }
 
     private fun checkProductPrices() {

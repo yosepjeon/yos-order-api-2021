@@ -75,12 +75,11 @@ class OrderWorkflow(
                 productStep.process()
             }
             .doOnNext {
-//                this.steps.add(productStep as WorkflowStep<Any>)
                 println("Product Step Result: ${it.state}")
 
-                if (it.state == "FAIL") {
-                    throw StepFailException("product step fail exception")
-                }
+//                if (it.state == "FAIL") {
+//                    throw StepFailException("product step fail exception")
+//                }
                 update(productStep as WorkflowStep<Any>)
                     .doOnNext { isSuccessUpdate ->
                         if (!isSuccessUpdate) {
@@ -89,6 +88,8 @@ class OrderWorkflow(
                     }
             }
             .flatMap {
+                throw StepFailException("product step fail exception")
+
                 Mono.create<CreatedOrderDto> { monoSink ->
                     monoSink.success(createdOrderDto)
                 }
@@ -100,6 +101,7 @@ class OrderWorkflow(
             .onErrorResume {
                 if(it is RuntimeException) {
                     revertFlow()
+                        .subscribe()
                 }
 
                 Mono.create<CreatedOrderDto> { monoSink ->
@@ -118,15 +120,10 @@ class OrderWorkflow(
         val monos = mutableListOf<Mono<Any>>()
 
         steps.forEach { step ->
-            println(step)
             monos.add(step.revert().subscribeOn(Schedulers.parallel()))
         }
 
-        return monos.zip {
-            it.forEach {
-                println("element: $it")
-            }
-        }
+        return monos.zip{}
     }
 
     private fun update(step: WorkflowStep<Any>): Mono<Boolean> {

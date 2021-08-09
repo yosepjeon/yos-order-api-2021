@@ -42,9 +42,9 @@ class OrderStep(
     }
 
     override fun revert(): Mono<CreatedOrderDto> {
-        println("call order step revert")
-
-        return Mono.empty()
+        return Mono.create { monoSink ->
+            monoSink.success()
+        }
     }
 
 }
