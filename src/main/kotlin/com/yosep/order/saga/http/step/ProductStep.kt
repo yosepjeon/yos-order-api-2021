@@ -74,35 +74,3 @@ class ProductStep(
 
     }
 }
-
-//internal class InventoryStep(private val webClient: WebClient, requestDTO: InventoryRequestDTO) : WorkflowStep {
-//    private val requestDTO: InventoryRequestDTO
-//    override var status = WorkflowStepStatus.PENDING
-//        private set
-//
-//    override fun process(): Mono<Boolean?> {
-//        return webClient
-//            .post()
-//            .uri("/inventory/deduct")
-//            .body(BodyInserters.fromValue<Any>(requestDTO))
-//            .retrieve()
-//            .bodyToMono(InventoryResponseDTO::class.java)
-//            .map { r -> r.getStatus().equals(InventoryStatus.AVAILABLE) }
-//            .doOnNext { b -> status = if (b) WorkflowStepStatus.COMPLETE else WorkflowStepStatus.FAILED }
-//    }
-//
-//    override fun revert(): Mono<Boolean?> {
-//        return webClient
-//            .post()
-//            .uri("/inventory/add")
-//            .body(BodyInserters.fromValue<Any>(requestDTO))
-//            .retrieve()
-//            .bodyToMono(Void::class.java)
-//            .map { r: Void? -> true }
-//            .onErrorReturn(false)
-//    }
-//
-//    init {
-//        this.requestDTO = requestDTO
-//    }
-//}

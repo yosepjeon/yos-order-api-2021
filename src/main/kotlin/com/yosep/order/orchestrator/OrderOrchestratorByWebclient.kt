@@ -85,52 +85,6 @@ class OrderOrchestratorByWebclient @Autowired constructor(
                 .filter { error ->
                     error is DuplicateKeyException
                 })
-
-//        return randomIdGenerator.generate()
-//            .flatMap { createdOrderEventId ->
-//                orderEventId = createdOrderEventId
-//                redisTemplate.hasKey(createdOrderEventId)
-//            }
-//            .flatMap { hasKey ->
-//                if (hasKey) {
-//                    throw DuplicateKeyException()
-//                } else {
-//                    orderWorkflow = OrderWorkflow<Any, OrderDtoForCreation>(
-//                        redisTemplate = redisTemplate,
-//                        orderService = orderService,
-//                        randomIdGenerator = randomIdGenerator,
-//                        id = orderEventId
-//                    )
-//
-//                    val paredOrderWorkFlow = objectMapper.writeValueAsString(orderWorkflow)
-//                    redisTemplate.opsForValue().set(orderEventId, paredOrderWorkFlow)
-//                        .flatMap {
-//                            println("$$$ $it")
-//                            redisTemplate.opsForValue().get(orderEventId)
-//                        }
-//                        .flatMap {
-//                            println("### $it")
-//
-//                            Mono.create<OrderWorkflow<*, *>> { monoSink ->
-////                                val selectedOrderWorkflow = objectMapper.readValue<OrderWorkflow<*, *>>(
-////                                    it,
-////                                    OrderWorkflow::class.java
-////                                )
-////
-////                                selectedOrderWorkflow.orderService = orderService
-////                                selectedOrderWorkflow.redisTemplate = redisTemplate
-////                                selectedOrderWorkflow.randomIdGenerator = randomIdGenerator
-////
-////                                monoSink.success(selectedOrderWorkflow)
-//                                monoSink.success(orderWorkflow as OrderWorkflow<Any, OrderDtoForCreation>)
-//                            }
-//                        }
-//                }
-//            }
-//            .retryWhen(Retry.max(5)
-//                .filter { error ->
-//                    error is DuplicateKeyException
-//                })
     }
 
     private fun doOnErrors(throwable: Throwable) {
