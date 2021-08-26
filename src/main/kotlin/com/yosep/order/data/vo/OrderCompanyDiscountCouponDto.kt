@@ -1,9 +1,10 @@
 package com.yosep.order.data.vo
 
-data class OrderProductDiscountCouponDto(
+data class OrderCompanyDiscountCouponDto(
     val dtype: String,
     val couponByUserId: String,
     val userId: String,
+    val couponType: String,
     val discountAmount: Long,
     val discountPercent: Long,
     val productId: String,

@@ -23,7 +23,7 @@ class OrderOrchestratorByWebclient @Autowired constructor(
     private val paymentWebclient: WebClient,
     @Qualifier("product")
     private val productWebclient: WebClient,
-    @Qualifier("coupon-command")
+    @Qualifier("coupon")
     private val couponWebclient: WebClient,
     private val orderService: OrderService,
     private val objectMapper: ObjectMapper,
@@ -46,7 +46,6 @@ class OrderOrchestratorByWebclient @Autowired constructor(
 
     private fun createOrderWorkFlow(orderDtoForCreation: OrderDtoForCreation): Mono<OrderWorkflow> {
         lateinit var orderEventId: String
-//        lateinit var orderWorkflow: Workflow<OrderDtoForCreation, CreatedOrderDto>
         lateinit var orderWorkflow: OrderWorkflow
 
         return randomIdGenerator.generate()

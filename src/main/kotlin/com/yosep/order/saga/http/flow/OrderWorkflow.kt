@@ -5,9 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.yosep.order.common.data.RandomIdGenerator
 import com.yosep.order.common.exception.NotExistWorkflowException
 import com.yosep.order.common.exception.StepFailException
-import com.yosep.order.data.dto.CreatedOrderDto
-import com.yosep.order.data.dto.OrderDtoForCreation
-import com.yosep.order.data.dto.ProductStepDtoForCreation
+import com.yosep.order.data.dto.*
+import com.yosep.order.data.vo.OrderTotalDiscountCouponDto
 import com.yosep.order.saga.http.Workflow
 import com.yosep.order.saga.http.WorkflowStep
 import com.yosep.order.saga.http.step.OrderStep
@@ -19,8 +18,6 @@ import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
-import reactor.kotlin.core.publisher.onErrorReturn
-import reactor.kotlin.core.publisher.toFlux
 import reactor.kotlin.core.publisher.zip
 import java.lang.RuntimeException
 import java.time.LocalDateTime
@@ -54,10 +51,18 @@ class OrderWorkflow(
             productWebclient,
             ProductStepDtoForCreation(orderDtoForCreation.totalPrice, orderDtoForCreation.orderProductDtos)
         )
-        val productDiscountCouponStep =
-            ProductDiscountCouponStep(couponWebclient, orderDtoForCreation.orderProductDiscountCouponDtos)
-        val totalDiscountCouponStep =
-            TotalDiscountCouponStep(couponWebclient, orderDtoForCreation.orderTotalDiscountCouponDtos)
+        val productDiscountCouponStep = ProductDiscountCouponStep(
+            couponWebclient,
+            OrderProductDiscountCouponStepDto(
+                orderDtoForCreation.orderProductDiscountCouponDtos
+            )
+        )
+//        val totalDiscountCouponStep = TotalDiscountCouponStep(
+//            couponWebclient,
+//            OrderTotalDiscountCouponStepDto(
+//                orderDtoForCreation.orderTotalDiscountCouponDtos
+//            )
+//        )
         var createdOrderDto: CreatedOrderDto? = null
 
         return orderStep.process()
@@ -99,7 +104,7 @@ class OrderWorkflow(
                 println(objectMapper!!.writeValueAsString(this))
             }
             .onErrorResume {
-                if(it is RuntimeException) {
+                if (it is RuntimeException) {
                     revertFlow()
                         .subscribe()
                 }
@@ -123,7 +128,7 @@ class OrderWorkflow(
             monos.add(step.revert().subscribeOn(Schedulers.parallel()))
         }
 
-        return monos.zip{}
+        return monos.zip {}
     }
 
     private fun update(step: WorkflowStep<Any>): Mono<Boolean> {

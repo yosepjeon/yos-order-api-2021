@@ -1,25 +1,15 @@
 package com.yosep.order.saga.http.step
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import com.yosep.order.data.dto.CreatedOrderDto
-import com.yosep.order.data.dto.OrderDtoForCreation
 import com.yosep.order.data.dto.ProductStepDtoForCreation
-import com.yosep.order.data.vo.OrderProductDtoForCreation
-import org.springframework.web.reactive.function.BodyInserters
 
 import reactor.core.publisher.Mono
-
-import com.yosep.order.saga.http.WorkflowStepStatus
 
 import org.springframework.web.reactive.function.client.WebClient
 
 import com.yosep.order.saga.http.WorkflowStep
 import com.yosep.order.saga.http.annotation.SagaStep
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
-import org.springframework.web.reactive.function.BodyInserter
-import reactor.core.publisher.Flux
-import reactor.kotlin.core.publisher.toFlux
 
 
 class ProductStep(
@@ -51,9 +41,9 @@ class ProductStep(
             .doOnNext { productStepDtoForCreation ->
                 this.productStepDtoForCreation = productStepDtoForCreation
 
-                if(this.productStepDtoForCreation.state == "FAIL") {
+                if (this.productStepDtoForCreation.state == "FAIL") {
                     this.state = "FAIL"
-                }else {
+                } else {
                     this.state = "COMP"
                 }
 

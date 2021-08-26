@@ -10,5 +10,5 @@ data class OrderProductDiscountCouponStepDto(
     val orderProductDiscountCouponDtos: List<OrderProductDiscountCouponDto>,
 
     @field:NotEmpty
-    val state: String = "READY"
+    var state: String = "READY"
 )
