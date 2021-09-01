@@ -57,12 +57,8 @@ class OrderWorkflow(
                 orderDtoForCreation.orderProductDiscountCouponDtos
             )
         )
-//        val totalDiscountCouponStep = TotalDiscountCouponStep(
-//            couponWebclient,
-//            OrderTotalDiscountCouponStepDto(
-//                orderDtoForCreation.orderTotalDiscountCouponDtos
-//            )
-//        )
+
+        var totalDiscountCouponStep: TotalDiscountCouponStep? = null
         var createdOrderDto: CreatedOrderDto? = null
 
         return orderStep.process()
@@ -80,8 +76,6 @@ class OrderWorkflow(
                 productStep.process()
             }
             .doOnNext {
-                println("Product Step Result: ${it.state}")
-
 //                if (it.state == "FAIL") {
 //                    throw StepFailException("product step fail exception")
 //                }
@@ -92,9 +86,51 @@ class OrderWorkflow(
                         }
                     }
             }
+            // !!!!
             .flatMap {
-                throw StepFailException("product step fail exception")
+                productDiscountCouponStep.process()
+            }
+            .doOnNext {
+                update(productDiscountCouponStep as WorkflowStep<Any>)
+                    .doOnNext { isSuccessUpdate ->
+                        if (!isSuccessUpdate) {
+                            throw NotExistWorkflowException()
+                        }
+                    }
+            }
+            .flatMap {
+                var totalPrice = 0L
+//                throw StepFailException("product step fail exception")
+                productDiscountCouponStep.orderProductDiscountCouponStepDto.orderProductDiscountCouponDtos.forEach {
+                    totalPrice += it.calculatedPrice
+                }
 
+                productStep.productStepDtoForCreation.orderProductDtos.forEach {
+                    totalPrice += (it.count * it.price)
+                }
+
+                totalDiscountCouponStep = TotalDiscountCouponStep(
+                    couponWebclient,
+                    OrderTotalDiscountCouponStepDto(
+                        totalPrice,
+                        orderDtoForCreation.orderTotalDiscountCouponDtos,
+                        0L,
+                        "READY"
+                    )
+                )
+
+                // TODO: null 없애기(!!)
+                totalDiscountCouponStep!!.process()
+            }
+            .doOnNext {
+                update(totalDiscountCouponStep as WorkflowStep<Any>)
+                    .doOnNext { isSuccessUpdate ->
+                        if (!isSuccessUpdate) {
+                            throw NotExistWorkflowException()
+                        }
+                    }
+            }
+            .flatMap {
                 Mono.create<CreatedOrderDto> { monoSink ->
                     monoSink.success(createdOrderDto)
                 }
@@ -113,10 +149,8 @@ class OrderWorkflow(
                     monoSink.success(createdOrderDto)
                 }
             }
-//            .doOnError {
-//                if(it is RuntimeException) {
-//                    revertFlow()
-//                }
+//            .flatMap {
+//
 //            }
     }
 

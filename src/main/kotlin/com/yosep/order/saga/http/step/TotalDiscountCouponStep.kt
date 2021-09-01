@@ -17,8 +17,8 @@ import reactor.core.publisher.Mono
 class TotalDiscountCouponStep(
     @JsonIgnore
     private val webClient: WebClient? = null,
-    val orderTotalDiscountCouponStepDto: OrderTotalDiscountCouponStepDto,
-    stepType: String = "COUPON",
+    var orderTotalDiscountCouponStepDto: OrderTotalDiscountCouponStepDto,
+    stepType: String = "TOTAL-DISCOUNT-COUPON",
     state: String = "READY"
 ) : WorkflowStep<OrderTotalDiscountCouponStepDto>(
     stepType, state
@@ -31,12 +31,28 @@ class TotalDiscountCouponStep(
 
         return webClient!!
             .post()
-            .uri("/test")
+            .uri("/total/order-saga-total-coupon")
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON)
             .bodyValue(orderTotalDiscountCouponStepDto)
             .retrieve()
             .bodyToMono(OrderTotalDiscountCouponStepDto::class.java)
+            .flatMap { orderTotalDiscountCouponStepDto ->
+                this.orderTotalDiscountCouponStepDto = orderTotalDiscountCouponStepDto
+
+                if (this.orderTotalDiscountCouponStepDto.state == "COMP") {
+                    this.state = "COMP"
+                } else {
+                    this.state = "FAIL"
+                }
+
+                println("[Total Discount Coupon Step]")
+                println(orderTotalDiscountCouponStepDto)
+
+                Mono.create<OrderTotalDiscountCouponStepDto> {
+                    it.success(orderTotalDiscountCouponStepDto)
+                }
+            }
     }
 
     override fun revert(): Mono<OrderTotalDiscountCouponStepDto> {

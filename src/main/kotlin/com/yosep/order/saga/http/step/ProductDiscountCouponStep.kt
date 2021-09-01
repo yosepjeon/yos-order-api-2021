@@ -16,7 +16,7 @@ class ProductDiscountCouponStep(
     @JsonIgnore
     private val webClient: WebClient? = null,
     var orderProductDiscountCouponStepDto: OrderProductDiscountCouponStepDto,
-    stepType: String = "PRODUCT",
+    stepType: String = "PRODUCT-DISCOUNT-COUPON",
     state: String = "READY"
 ) : WorkflowStep<OrderProductDiscountCouponStepDto>(
     stepType,
@@ -29,12 +29,28 @@ class ProductDiscountCouponStep(
 
         return webClient!!
             .post()
-            .uri("/test")
+            .uri("/product/order-saga-product-coupon")
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON)
             .bodyValue(orderProductDiscountCouponStepDto)
             .retrieve()
             .bodyToMono(OrderProductDiscountCouponStepDto::class.java)
+            .flatMap { orderProductDiscountCouponStepDto ->
+                this.orderProductDiscountCouponStepDto = orderProductDiscountCouponStepDto
+
+                if (this.orderProductDiscountCouponStepDto.state == "COMP") {
+                    this.state = "COMP"
+                } else {
+                    this.state = "FAIL"
+                }
+
+                println("[Product Discount Coupon Step]")
+                println(orderProductDiscountCouponStepDto)
+
+                Mono.create<OrderProductDiscountCouponStepDto> {
+                    it.success(orderProductDiscountCouponStepDto)
+                }
+            }
     }
 
     override fun revert(): Mono<OrderProductDiscountCouponStepDto> {

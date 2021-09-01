@@ -5,7 +5,9 @@ import com.yosep.order.common.exception.DuplicateKeyException
 import com.yosep.order.common.exception.TestException
 import com.yosep.order.common.reactive.Transaction
 import com.yosep.order.data.dto.OrderDtoForCreation
+import com.yosep.order.data.vo.OrderProductDiscountCouponDto
 import com.yosep.order.data.vo.OrderProductDtoForCreation
+import com.yosep.order.data.vo.OrderTotalDiscountCouponDto
 import com.yosep.order.orchestrator.OrderOrchestratorByWebclient
 import com.yosep.order.saga.http.Workflow
 import com.yosep.order.saga.http.flow.OrderWorkflow
@@ -81,29 +83,61 @@ class OrderOrchestratorByWebclientTest @Autowired constructor(
 
     @Test
     @DisplayName("[OrderOrchestratorByWebclientTest] workflow_생성_및_저장_테스트")
-    fun workflow_생성_및_저장_테스트() {
+    fun workflow_생성_및_저장_테스트1() {
         log.info("[OrderOrchestratorByWebclientTest] workflow_생성_및_저장_테스트")
 
-        val productCount = (Math.random() * 10).toInt() + 1
-        val orderProducts = mutableListOf<OrderProductDtoForCreation>()
+        val productCount = (Math.random() * 5).toInt() + 1
 
+        val orderProducts = mutableListOf<OrderProductDtoForCreation>()
         for (i in 0 until productCount) {
             val productInfoForCreation = OrderProductDtoForCreation(
-                i.toString(),
-                (Math.random() * 10).toInt(),
-                100000,
+                "test-product-category1-$i",
+                i+1,
+                (((i + 1) * 111000).toLong()),
                 "READY"
             )
 
             orderProducts.add(productInfoForCreation)
         }
 
+        val orderProductDiscountCouponDtos = mutableListOf<OrderProductDiscountCouponDto>()
+        for (i in 1..2) {
+            val orderProductDiscountCouponDto = OrderProductDiscountCouponDto(
+                "PRODUCT",
+                "own-product-amount-coupon-test$i",
+                1L * i,
+                "user-admin-for-test",
+                10000,
+                0,
+                "test-product-category1-$i",
+                i * 111000L,
+                0,
+                "READY"
+            )
+
+            orderProductDiscountCouponDtos.add(orderProductDiscountCouponDto)
+        }
+
+        val orderTotalDiscountCouponDtos = mutableListOf<OrderTotalDiscountCouponDto>()
+        for(i in 1..2) {
+            val orderTotalDiscountCouponDto = OrderTotalDiscountCouponDto(
+                "TOTAL",
+                "own-total-amount-coupon-test$i",
+                "user-admin-for-test",
+                10000,
+                0,
+                "READY"
+            )
+
+            orderTotalDiscountCouponDtos.add(orderTotalDiscountCouponDto)
+        }
+
         val orderDtoForCreation = OrderDtoForCreation(
             1000000,
             orderProducts,
-            emptyList(),
-            emptyList(),
-            "sender1",
+            orderProductDiscountCouponDtos,
+            orderTotalDiscountCouponDtos,
+            "user-admin-for-test",
             "요깨비",
             "이재훈",
             "123123123",
@@ -115,16 +149,163 @@ class OrderOrchestratorByWebclientTest @Autowired constructor(
             "READY",
         )
 
-//        orderOrchestratorByWebclient.order(orderDtoForCreation)
-//            .flatMap(redisTemplate.opsForValue()::get)
-//            .`as`(StepVerifier::create)
-//            .assertNext { paredOrderWorkFlow ->
-//                log.info(paredOrderWorkFlow)
-//                val orderWorkflow = objectMapper.readValue<Workflow<*, *>>(paredOrderWorkFlow, Workflow::class.java)
-//
-//                log.info(orderWorkflow.getSteps().toString())
-//            }
-//            .verifyComplete()
+        orderOrchestratorByWebclient.order(orderDtoForCreation)
+            .`as`(Transaction::withRollback)
+            .`as`(StepVerifier::create)
+            .assertNext { createdOrderDto ->
+                log.info("최종 결과")
+                log.info(createdOrderDto.toString())
+            }
+            .verifyComplete()
+
+    }
+
+    @Test
+    @DisplayName("[OrderOrchestratorByWebclientTest] workflow_생성_및_저장_테스트")
+    fun workflow_생성_및_저장_테스트2() {
+        log.info("[OrderOrchestratorByWebclientTest] workflow_생성_및_저장_테스트")
+
+        val productCount = (Math.random() * 5).toInt() + 1
+
+        val orderProducts = mutableListOf<OrderProductDtoForCreation>()
+        for (i in 0 until productCount) {
+            val productInfoForCreation = OrderProductDtoForCreation(
+                "test-product-category1-$i",
+                i+1,
+                (((i + 1) * 111000).toLong()),
+                "READY"
+            )
+
+            orderProducts.add(productInfoForCreation)
+        }
+
+        val orderProductDiscountCouponDtos = mutableListOf<OrderProductDiscountCouponDto>()
+        for (i in 1..2) {
+            val orderProductDiscountCouponDto = OrderProductDiscountCouponDto(
+                "PRODUCT",
+                "own-product-amount-coupon-test$i",
+                1L * i,
+                "user-admin-for-test",
+                10000,
+                0,
+                "test-product-category1-$i",
+                i * 111000L,
+                0,
+                "READY"
+            )
+
+            orderProductDiscountCouponDtos.add(orderProductDiscountCouponDto)
+        }
+
+        val orderTotalDiscountCouponDtos = mutableListOf<OrderTotalDiscountCouponDto>()
+        for(i in 1..1) {
+            val orderTotalDiscountCouponDto = OrderTotalDiscountCouponDto(
+                "TOTAL",
+                "own-total-percent-coupon-test$i",
+                "user-admin-for-test",
+                0,
+                i * 10L,
+                "READY"
+            )
+
+            orderTotalDiscountCouponDtos.add(orderTotalDiscountCouponDto)
+        }
+
+        val orderDtoForCreation = OrderDtoForCreation(
+            1000000,
+            orderProducts,
+            orderProductDiscountCouponDtos,
+            orderTotalDiscountCouponDtos,
+            "user-admin-for-test",
+            "요깨비",
+            "이재훈",
+            "123123123",
+            "asdf",
+            "asdf",
+            "asdf",
+            "asdf",
+            "asdf",
+            "READY",
+        )
+
+        orderOrchestratorByWebclient.order(orderDtoForCreation)
+            .`as`(Transaction::withRollback)
+            .`as`(StepVerifier::create)
+            .assertNext { createdOrderDto ->
+                log.info("최종 결과")
+                log.info(createdOrderDto.toString())
+            }
+            .verifyComplete()
+
+    }
+
+    @Test
+    @DisplayName("[OrderOrchestratorByWebclientTest] workflow_생성_및_저장_테스트")
+    fun workflow_생성_및_저장_테스트3() {
+        log.info("[OrderOrchestratorByWebclientTest] workflow_생성_및_저장_테스트")
+
+        val productCount = (Math.random() * 5).toInt() + 1
+
+        val orderProducts = mutableListOf<OrderProductDtoForCreation>()
+        for (i in 0 until productCount) {
+            val productInfoForCreation = OrderProductDtoForCreation(
+                "test-product-category1-$i",
+                i+1,
+                (((i + 1) * 111000).toLong()),
+                "READY"
+            )
+
+            orderProducts.add(productInfoForCreation)
+        }
+
+        val orderProductDiscountCouponDtos = mutableListOf<OrderProductDiscountCouponDto>()
+        for (i in 1..2) {
+            val orderProductDiscountCouponDto = OrderProductDiscountCouponDto(
+                "PRODUCT",
+                "own-product-amount-coupon-test$i",
+                1L * i,
+                "user-admin-for-test",
+                10000,
+                0,
+                "test-product-category1-$i",
+                i * 111000L,
+                0,
+                "READY"
+            )
+
+            orderProductDiscountCouponDtos.add(orderProductDiscountCouponDto)
+        }
+
+        val orderTotalDiscountCouponDtos = mutableListOf<OrderTotalDiscountCouponDto>()
+        for(i in 1..2) {
+            val orderTotalDiscountCouponDto = OrderTotalDiscountCouponDto(
+                "TOTAL",
+                "own-total-amount-coupon-test$i",
+                "user-admin-for-test",
+                10000,
+                0,
+                "READY"
+            )
+
+            orderTotalDiscountCouponDtos.add(orderTotalDiscountCouponDto)
+        }
+
+        val orderDtoForCreation = OrderDtoForCreation(
+            1000000,
+            orderProducts,
+            orderProductDiscountCouponDtos,
+            orderTotalDiscountCouponDtos,
+            "user-admin-for-test",
+            "요깨비",
+            "이재훈",
+            "123123123",
+            "asdf",
+            "asdf",
+            "asdf",
+            "asdf",
+            "asdf",
+            "READY",
+        )
 
         orderOrchestratorByWebclient.order(orderDtoForCreation)
             .`as`(Transaction::withRollback)

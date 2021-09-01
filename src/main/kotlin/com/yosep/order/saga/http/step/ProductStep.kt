@@ -15,7 +15,6 @@ import org.springframework.http.MediaType
 class ProductStep(
     @JsonIgnore
     private val webClient: WebClient? = null,
-//    private val orderProductsDtoForCreation: List<OrderProductDtoForCreation> = emptyList(),
     var productStepDtoForCreation: ProductStepDtoForCreation,
     stepType: String = "PRODUCT",
     state: String = "READY"
@@ -26,8 +25,6 @@ class ProductStep(
     @SagaStep
     override fun process(): Mono<ProductStepDtoForCreation> {
         this.state = "PENDING"
-        this.productStepDtoForCreation.state = "PENDING"
-//        WebClientResponseException.GatewayTimeout
 
         return webClient!!
             .post()
@@ -41,10 +38,10 @@ class ProductStep(
             .doOnNext { productStepDtoForCreation ->
                 this.productStepDtoForCreation = productStepDtoForCreation
 
-                if (this.productStepDtoForCreation.state == "FAIL") {
-                    this.state = "FAIL"
-                } else {
+                if (this.productStepDtoForCreation.state == "COMP") {
                     this.state = "COMP"
+                } else {
+                    this.state = "FAIL"
                 }
 
                 println("[ProductStep]")

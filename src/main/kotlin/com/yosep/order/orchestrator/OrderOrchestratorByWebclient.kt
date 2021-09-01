@@ -39,6 +39,7 @@ class OrderOrchestratorByWebclient @Autowired constructor(
         return createOrderWorkFlow(orderDtoForCreation)
             .flatMap { createdOrderWorkFlow ->
                 orderWorkflow = createdOrderWorkFlow as OrderWorkflow
+                orderWorkflow.state = "PENDING"
                 orderWorkflow.processFlow()
             }
 //            .flatMap(orderWorkflow.processFlow(orderDtoForCreation))
