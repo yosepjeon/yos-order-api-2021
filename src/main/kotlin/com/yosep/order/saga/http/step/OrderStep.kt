@@ -34,14 +34,16 @@ class OrderStep(
 
                 orderId = this.createdOrderDto.order.orderId
 
-                this.state = "COMP"
+                this.state = "ORDER_STEP_COMP"
                 Mono.create<CreatedOrderDto> { monoSink ->
                     monoSink.success(this.createdOrderDto)
                 }
             }
     }
 
-    override fun revert(): Mono<CreatedOrderDto> {
+    override fun revert(orderId: String): Mono<Any> {
+        println("call order step revert()")
+
         return Mono.create { monoSink ->
             monoSink.success()
         }

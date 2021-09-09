@@ -5,6 +5,7 @@ import com.yosep.order.common.data.RandomIdGenerator
 import com.yosep.order.common.exception.DuplicateKeyException
 import com.yosep.order.data.dto.CreatedOrderDto
 import com.yosep.order.data.dto.OrderDtoForCreation
+import com.yosep.order.data.entity.Order
 import com.yosep.order.saga.http.Workflow
 import com.yosep.order.saga.http.flow.OrderWorkflow
 import com.yosep.order.service.OrderService
@@ -30,9 +31,9 @@ class OrderOrchestratorByWebclient @Autowired constructor(
     private val redisTemplate: ReactiveRedisTemplate<String, String>,
     private val randomIdGenerator: RandomIdGenerator
 ) {
+
     fun order(orderDtoForCreation: OrderDtoForCreation): Mono<CreatedOrderDto> {
 
-        lateinit var orderEventId: String
         lateinit var orderWorkflow: OrderWorkflow
 //        lateinit var orderWorkflow: Workflow<OrderDtoForCreation, CreatedOrderDto>
 
@@ -40,19 +41,43 @@ class OrderOrchestratorByWebclient @Autowired constructor(
             .flatMap { createdOrderWorkFlow ->
                 orderWorkflow = createdOrderWorkFlow as OrderWorkflow
                 orderWorkflow.state = "PENDING"
+
+
                 orderWorkflow.processFlow()
+                    .flatMap { result ->
+
+                        Mono.create<CreatedOrderDto> {
+                            if(result) {
+                                it.success(CreatedOrderDto(Order()))
+                            }else {
+                                it.success(CreatedOrderDto(Order()))
+                            }
+                        }
+                    }
             }
-//            .flatMap(orderWorkflow.processFlow(orderDtoForCreation))
+    }
+
+    fun revertOrder(orderId: String) {
+        
     }
 
     private fun createOrderWorkFlow(orderDtoForCreation: OrderDtoForCreation): Mono<OrderWorkflow> {
         lateinit var orderEventId: String
         lateinit var orderWorkflow: OrderWorkflow
 
-        return randomIdGenerator.generate()
-            .flatMap { createdOrderEventId ->
-                orderEventId = createdOrderEventId
-//                redisTemplate.hasKey(createdOrderEventId)
+
+//        return randomIdGenerator.generate()
+//            .flatMap {
+//                orderService.checkDuplicateId(it)
+//            }
+        return orderService!!.createOrder(orderDtoForCreation)
+//            .flatMap { createdOrderDto ->
+//                Mono.create<String> { monoSink ->
+//                    monoSink.success(createdOrderDto.order.orderId)
+//                }
+//            }
+            .flatMap { createdOrderDto ->
+                orderEventId = createdOrderDto.order.orderId
                 orderWorkflow = OrderWorkflow(
                     paymentWebclient = paymentWebclient,
                     productWebclient = productWebclient,
@@ -66,7 +91,6 @@ class OrderOrchestratorByWebclient @Autowired constructor(
                 )
 
                 val parsedOrderWorkFlow = objectMapper.writeValueAsString(orderWorkflow)
-//                println(parsedOrderWorkFlow)
                 val workflow = objectMapper.readValue(parsedOrderWorkFlow, Workflow::class.java)
 
                 redisTemplate.opsForValue().setIfAbsent(orderEventId, parsedOrderWorkFlow)
@@ -80,6 +104,9 @@ class OrderOrchestratorByWebclient @Autowired constructor(
                         monoSink.success(orderWorkflow)
                     }
                 }
+                Mono.create<OrderWorkflow> { monoSink ->
+                    monoSink.success(orderWorkflow)
+                }
             }
             .retryWhen(Retry.max(5)
                 .filter { error ->
@@ -90,4 +117,67 @@ class OrderOrchestratorByWebclient @Autowired constructor(
     private fun doOnErrors(throwable: Throwable) {
 
     }
+
+//    fun order(orderDtoForCreation: OrderDtoForCreation): Mono<CreatedOrderDto> {
+//
+//        lateinit var orderEventId: String
+//        lateinit var orderWorkflow: OrderWorkflow
+////        lateinit var orderWorkflow: Workflow<OrderDtoForCreation, CreatedOrderDto>
+//
+//        return createOrderWorkFlow(orderDtoForCreation)
+//            .flatMap { createdOrderWorkFlow ->
+//                orderWorkflow = createdOrderWorkFlow as OrderWorkflow
+//                orderWorkflow.state = "PENDING"
+//                orderWorkflow.processFlow()
+//            }
+////            .flatMap(orderWorkflow.processFlow(orderDtoForCreation))
+//    }
+//
+//    private fun createOrderWorkFlow(orderDtoForCreation: OrderDtoForCreation): Mono<OrderWorkflow> {
+//        lateinit var orderEventId: String
+//        lateinit var orderWorkflow: OrderWorkflow
+//
+//        return randomIdGenerator.generate()
+//            .flatMap {
+//                orderService.checkDuplicateId(it)
+//            }
+//            .flatMap { createdOrderEventId ->
+//                orderEventId = createdOrderEventId
+////                redisTemplate.hasKey(createdOrderEventId)
+//                orderWorkflow = OrderWorkflow(
+//                    paymentWebclient = paymentWebclient,
+//                    productWebclient = productWebclient,
+//                    couponWebclient = couponWebclient,
+//                    redisTemplate = redisTemplate,
+//                    orderService = orderService,
+//                    randomIdGenerator = randomIdGenerator,
+//                    objectMapper = objectMapper,
+//                    orderDtoForCreation = orderDtoForCreation,
+//                    id = orderEventId
+//                )
+//
+//                val parsedOrderWorkFlow = objectMapper.writeValueAsString(orderWorkflow)
+////                println(parsedOrderWorkFlow)
+//                val workflow = objectMapper.readValue(parsedOrderWorkFlow, Workflow::class.java)
+//
+//                redisTemplate.opsForValue().setIfAbsent(orderEventId, parsedOrderWorkFlow)
+//            }
+//            .flatMap { result ->
+////                if (!result) {
+////                    throw DuplicateKeyException()
+////                } else {
+////
+////                    Mono.create<OrderWorkflow> { monoSink ->
+////                        monoSink.success(orderWorkflow)
+////                    }
+////                }
+//                Mono.create<OrderWorkflow> { monoSink ->
+//                    monoSink.success(orderWorkflow)
+//                }
+//            }
+//            .retryWhen(Retry.max(5)
+//                .filter { error ->
+//                    error is DuplicateKeyException
+//                })
+//    }
 }

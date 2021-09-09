@@ -8,6 +8,8 @@ import javax.validation.constraints.NotNull
 import javax.validation.constraints.Size
 
 data class ProductStepDtoForCreation(
+    val orderId: String,
+
     @field:NotNull
     @field:Min(0)
     val totalPrice: Long,
@@ -15,7 +17,6 @@ data class ProductStepDtoForCreation(
     @field:NotEmpty
     @field:Size(min = 1)
     val orderProductDtos: List<OrderProductDtoForCreation>,
-
     @field:NotEmpty
     var state: String = "READY"
 ): RepresentationModel<ProductStepDtoForCreation>()

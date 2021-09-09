@@ -2,6 +2,7 @@ package com.yosep.order.order.saga.http
 
 import com.yosep.order.data.dto.OrderTotalDiscountCouponStepDto
 import com.yosep.order.data.vo.OrderTotalDiscountCouponDto
+import com.yosep.order.mq.producer.OrderToCouponProducer
 import com.yosep.order.saga.http.step.TotalDiscountCouponStep
 import io.netty.util.internal.logging.Slf4JLoggerFactory
 import org.junit.jupiter.api.DisplayName
@@ -18,7 +19,8 @@ import reactor.test.StepVerifier
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores::class)
 class TotalDiscountCouponStepTest @Autowired constructor(
     @Qualifier("coupon")
-    private val couponWebclient: WebClient
+    private val couponWebclient: WebClient,
+    private val orderToCouponProducer: OrderToCouponProducer
 ) {
     val log = Slf4JLoggerFactory.getInstance(TotalDiscountCouponStepTest::class.java)
 
@@ -42,6 +44,7 @@ class TotalDiscountCouponStepTest @Autowired constructor(
         }
 
         val orderTotalDiscountCouponStepDto = OrderTotalDiscountCouponStepDto(
+            "",
             100000,
             orderTotalDiscountCouponDtos,
             0,
@@ -50,6 +53,7 @@ class TotalDiscountCouponStepTest @Autowired constructor(
 
         val totalDiscountCouponStep = TotalDiscountCouponStep(
             couponWebclient,
+            orderToCouponProducer,
             orderTotalDiscountCouponStepDto,
             "TOTAL-DISCOUNT-COUPON",
             "READY"

@@ -6,10 +6,13 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.DisplayNameGeneration
 import org.junit.jupiter.api.DisplayNameGenerator
 import org.junit.jupiter.api.Test
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
 import reactor.kotlin.core.publisher.zip
 import reactor.test.StepVerifier
+import reactor.util.retry.Retry
+import java.lang.RuntimeException
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores::class)
 class WebfluxTest {
@@ -36,7 +39,7 @@ class WebfluxTest {
             monoSink.success(Order("test1"))
         }
 
-        val monoZip = Mono.zip(m1,m2,m3,m4)
+        val monoZip = Mono.zip(m1, m2, m3, m4)
 
         StepVerifier.create(monoZip)
             .assertNext {
@@ -54,7 +57,7 @@ class WebfluxTest {
         val monos = mutableListOf<Mono<Any>>()
 
         val list1 = mutableListOf<String>()
-        for(i in 0 until 10) {
+        for (i in 0 until 10) {
             list1.add("call order step revert")
         }
 
@@ -67,7 +70,7 @@ class WebfluxTest {
         }.subscribeOn(Schedulers.parallel())
 
         val list2 = mutableListOf<String>()
-        for(i in 0 until 10) {
+        for (i in 0 until 10) {
             list2.add("call product step revert")
         }
 
@@ -82,9 +85,38 @@ class WebfluxTest {
         monos.add(m1)
         monos.add(m2)
 
-        val monosZip = monos.zip {  }
+        val monosZip = monos.zip { }
         log.info("병렬실행 확인")
         StepVerifier.create(monosZip)
             .verifyComplete()
+    }
+
+    @Test
+    fun error_handle_test() {
+        val start = Mono.create<Integer> { it ->
+            log.info("process $it")
+            throw RuntimeException()
+        }
+            .onErrorResume {
+                log.info("resume")
+                log.info(it)
+
+                if(it is RuntimeException) {
+                    log.info("###")
+                }
+
+                Mono.create<Integer> {
+                    it.success()
+                }
+            }
+
+        start
+            .`as`(StepVerifier::create)
+            .verifyComplete()
+    }
+
+    private fun handleError(error: Throwable): Unit {
+        log.info(error)
+        log.info("!!!")
     }
 }

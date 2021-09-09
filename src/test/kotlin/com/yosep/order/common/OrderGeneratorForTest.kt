@@ -31,6 +31,7 @@ class OrderGeneratorForTest @Autowired constructor(
             }
 
             val orderDtoForCreation = OrderDtoForCreation(
+                "",
                 100000000,
                 productInfoForCreations,
                 emptyList(),

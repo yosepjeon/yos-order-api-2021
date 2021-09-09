@@ -48,7 +48,7 @@ class OrderTestService @Autowired constructor(
 
     fun sendMessage(): Mono<SenderResult<Int>> {
         println("###")
-        return commandToTestKafkaProducer.sendMessages("test-topic",3)
+        return commandToTestKafkaProducer.sendMessages("test-topic","asd")
             .toMono()
     }
 

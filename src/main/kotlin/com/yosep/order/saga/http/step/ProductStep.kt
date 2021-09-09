@@ -2,6 +2,8 @@ package com.yosep.order.saga.http.step
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.yosep.order.data.dto.ProductStepDtoForCreation
+import com.yosep.order.event.saga.revert.RevertProductStepEvent
+import com.yosep.order.mq.producer.OrderToProductProducer
 
 import reactor.core.publisher.Mono
 
@@ -10,11 +12,14 @@ import org.springframework.web.reactive.function.client.WebClient
 import com.yosep.order.saga.http.WorkflowStep
 import com.yosep.order.saga.http.annotation.SagaStep
 import org.springframework.http.MediaType
+import reactor.kotlin.core.publisher.toMono
 
 
 class ProductStep(
     @JsonIgnore
     private val webClient: WebClient? = null,
+    @JsonIgnore
+    private val orderToProductProducer: OrderToProductProducer? = null,
     var productStepDtoForCreation: ProductStepDtoForCreation,
     stepType: String = "PRODUCT",
     state: String = "READY"
@@ -39,9 +44,10 @@ class ProductStep(
                 this.productStepDtoForCreation = productStepDtoForCreation
 
                 if (this.productStepDtoForCreation.state == "COMP") {
-                    this.state = "COMP"
+                    this.state = "PRODUCT_STEP_COMP"
                 } else {
-                    this.state = "FAIL"
+                    this.state = "PRODUCT_STEP_FAIL"
+                    throw RuntimeException(this.state)
                 }
 
                 println("[ProductStep]")
@@ -49,12 +55,22 @@ class ProductStep(
             }
     }
 
-    override fun revert(): Mono<ProductStepDtoForCreation> {
+    override fun revert(orderId: String): Mono<Any> {
+        println("call product step revert()")
 
-        return Mono.create { monoSink ->
+        val revertProductStepEvent = RevertProductStepEvent(
+            orderId,
+            productStepDtoForCreation.orderProductDtos
+        )
 
-            monoSink.success()
-        }
+        return orderToProductProducer!!.publishRevertProductEvent(revertProductStepEvent).toMono()
+//        return Mono.create { monoSink ->
+//
+//
+//            monoSink.success()
+//        }
+
+//        return produ
     }
 
     private fun checkProductPrices() {

@@ -5,5 +5,5 @@ import com.yosep.order.data.entity.OrderProduct
 
 data class CreatedOrderDto(
     val order: Order,
-    val orderProducts: List<OrderProduct>
+    val orderProducts: List<OrderProduct> = emptyList()
 )

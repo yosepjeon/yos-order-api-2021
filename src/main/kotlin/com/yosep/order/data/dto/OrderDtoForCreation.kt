@@ -6,6 +6,8 @@ import com.yosep.order.data.vo.OrderTotalDiscountCouponDto
 import javax.validation.constraints.*
 
 data class OrderDtoForCreation(
+    var orderId: String,
+
     @field:NotNull
     @field:Min(0)
     val totalPrice: Long,

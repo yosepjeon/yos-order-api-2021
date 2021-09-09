@@ -39,6 +39,7 @@ class OrderStepTest @Autowired constructor(
         }
 
         val orderDtoForCreation = OrderDtoForCreation(
+            "",
             10000000,
             orderProducts,
             emptyList(),

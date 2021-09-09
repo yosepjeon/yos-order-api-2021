@@ -2,19 +2,19 @@ package com.yosep.order.saga.http.step
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.yosep.order.data.dto.OrderProductDiscountCouponStepDto
-import com.yosep.order.data.dto.ProductStepDtoForCreation
-import com.yosep.order.data.vo.OrderProductDiscountCouponDto
-import com.yosep.order.data.vo.OrderTotalDiscountCouponDto
+import com.yosep.order.event.saga.revert.RevertProductDiscountCouponStepEvent
+import com.yosep.order.mq.producer.OrderToCouponProducer
 import com.yosep.order.saga.http.WorkflowStep
 import com.yosep.order.saga.http.annotation.SagaStep
 import org.springframework.http.MediaType
-import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
 
 class ProductDiscountCouponStep(
     @JsonIgnore
     private val webClient: WebClient? = null,
+    @JsonIgnore
+    private var orderToCouponProducer: OrderToCouponProducer? = null,
     var orderProductDiscountCouponStepDto: OrderProductDiscountCouponStepDto,
     stepType: String = "PRODUCT-DISCOUNT-COUPON",
     state: String = "READY"
@@ -39,9 +39,10 @@ class ProductDiscountCouponStep(
                 this.orderProductDiscountCouponStepDto = orderProductDiscountCouponStepDto
 
                 if (this.orderProductDiscountCouponStepDto.state == "COMP") {
-                    this.state = "COMP"
+                    this.state = "PD_COUPON_STEP_COMP"
                 } else {
-                    this.state = "FAIL"
+                    this.state = "PD_COUPON_STEP_FAIL"
+                    throw RuntimeException(this.state)
                 }
 
                 println("[Product Discount Coupon Step]")
@@ -51,9 +52,23 @@ class ProductDiscountCouponStep(
                     it.success(orderProductDiscountCouponStepDto)
                 }
             }
+            .doOnError {
+                println("################ $it")
+                throw RuntimeException("$it")
+            }
     }
 
-    override fun revert(): Mono<OrderProductDiscountCouponStepDto> {
-        return Mono.empty()
+    override fun revert(orderId: String): Mono<Any> {
+        println("call product discount coupon step revert()")
+        val revertProductDiscountCouponStepEvent = RevertProductDiscountCouponStepEvent(
+            orderId,
+            orderProductDiscountCouponStepDto.orderProductDiscountCouponDtos
+        )
+
+        return orderToCouponProducer!!.publishRevertProductDiscountCouponEvent(revertProductDiscountCouponStepEvent)
+//        return Mono.create { monoSink ->
+//
+//            monoSink.success()
+//        }
     }
 }

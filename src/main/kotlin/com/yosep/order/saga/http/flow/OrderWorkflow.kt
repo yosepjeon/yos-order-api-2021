@@ -4,9 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.yosep.order.common.data.RandomIdGenerator
 import com.yosep.order.common.exception.NotExistWorkflowException
-import com.yosep.order.common.exception.StepFailException
 import com.yosep.order.data.dto.*
-import com.yosep.order.data.vo.OrderTotalDiscountCouponDto
+import com.yosep.order.mq.producer.OrderToCouponProducer
+import com.yosep.order.mq.producer.OrderToProductProducer
 import com.yosep.order.saga.http.Workflow
 import com.yosep.order.saga.http.WorkflowStep
 import com.yosep.order.saga.http.step.OrderStep
@@ -30,6 +30,10 @@ class OrderWorkflow(
     @JsonIgnore
     private val couponWebclient: WebClient,
     @JsonIgnore
+    private var orderToProductProducer: OrderToProductProducer? = null,
+    @JsonIgnore
+    private var orderToCouponProducer: OrderToCouponProducer? = null,
+    @JsonIgnore
     private var redisTemplate: ReactiveRedisTemplate<String, String>? = null,
     @JsonIgnore
     private var orderService: OrderService? = null,
@@ -45,15 +49,20 @@ class OrderWorkflow(
     state: String = "READY",
     createdDate: LocalDateTime = LocalDateTime.now()
 ) : Workflow<OrderDtoForCreation, CreatedOrderDto>(id, steps, type, state, createdDate) {
-    fun processFlow(): Mono<CreatedOrderDto> {
+    fun processFlow(): Mono<Boolean> {
+        orderDtoForCreation.orderId = id
+
         val orderStep = OrderStep(orderService, randomIdGenerator, orderDtoForCreation)
         val productStep = ProductStep(
             productWebclient,
-            ProductStepDtoForCreation(orderDtoForCreation.totalPrice, orderDtoForCreation.orderProductDtos)
+            orderToProductProducer,
+            ProductStepDtoForCreation(id, orderDtoForCreation.totalPrice, orderDtoForCreation.orderProductDtos)
         )
         val productDiscountCouponStep = ProductDiscountCouponStep(
             couponWebclient,
+            orderToCouponProducer,
             OrderProductDiscountCouponStepDto(
+                id,
                 orderDtoForCreation.orderProductDiscountCouponDtos
             )
         )
@@ -61,20 +70,7 @@ class OrderWorkflow(
         var totalDiscountCouponStep: TotalDiscountCouponStep? = null
         var createdOrderDto: CreatedOrderDto? = null
 
-        return orderStep.process()
-            .doOnNext {
-                createdOrderDto = it
-//                this.steps.add(orderStep as WorkflowStep<Any>)
-                update(orderStep as WorkflowStep<Any>)
-                    .doOnNext { isSuccessUpdate ->
-                        if (!isSuccessUpdate) {
-                            throw NotExistWorkflowException()
-                        }
-                    }
-            }
-            .flatMap {
-                productStep.process()
-            }
+        return productStep.process()
             .doOnNext {
 //                if (it.state == "FAIL") {
 //                    throw StepFailException("product step fail exception")
@@ -111,7 +107,9 @@ class OrderWorkflow(
 
                 totalDiscountCouponStep = TotalDiscountCouponStep(
                     couponWebclient,
+                    orderToCouponProducer,
                     OrderTotalDiscountCouponStepDto(
+                        id,
                         totalPrice,
                         orderDtoForCreation.orderTotalDiscountCouponDtos,
                         0L,
@@ -131,8 +129,8 @@ class OrderWorkflow(
                     }
             }
             .flatMap {
-                Mono.create<CreatedOrderDto> { monoSink ->
-                    monoSink.success(createdOrderDto)
+                Mono.create<Boolean> { monoSink ->
+                    monoSink.success(true)
                 }
             }
             .doOnNext {
@@ -140,26 +138,29 @@ class OrderWorkflow(
                 println(objectMapper!!.writeValueAsString(this))
             }
             .onErrorResume {
+                println("######")
+                println(it)
+
                 if (it is RuntimeException) {
                     revertFlow()
                         .subscribe()
                 }
 
-                Mono.create<CreatedOrderDto> { monoSink ->
-                    monoSink.success(createdOrderDto)
+                Mono.create<Boolean> { monoSink ->
+//                    monoSink.success(createdOrderDto)
+                    monoSink.success(false)
                 }
             }
-//            .flatMap {
-//
-//            }
     }
 
     fun revertFlow(): Mono<Unit> {
+        println("call revertFlow()")
+
         Mono.zip(Mono.just(1), Mono.just(2))
         val monos = mutableListOf<Mono<Any>>()
 
         steps.forEach { step ->
-            monos.add(step.revert().subscribeOn(Schedulers.parallel()))
+            monos.add(step.revert(id).subscribeOn(Schedulers.parallel()))
         }
 
         return monos.zip {}
@@ -176,33 +177,3 @@ class OrderWorkflow(
         return redisTemplate!!.opsForValue().setIfPresent(id, parsedOrderWorkflow)
     }
 }
-
-//class OrderWorkflow<T,R>(
-//    @JsonIgnore
-//    var redisTemplate: ReactiveRedisTemplate<String, String>? = null,
-//    @JsonIgnore
-//    var orderService: OrderService? = null,
-//    @JsonIgnore
-//    var randomIdGenerator: RandomIdGenerator? = null,
-//    id: String = "",
-////    steps: MutableList<WorkflowStep<OrderDtoForCreation, CreatedOrderDto>> = mutableListOf(),
-//    steps: MutableList<WorkflowStep<T,R>> = mutableListOf(),
-//    type: String = "ORDER",
-//    state: String = "READY",
-//    createdDate: LocalDateTime = LocalDateTime.now()
-//) : Workflow<T,R>(id, steps, type, state, createdDate) {
-//    fun processFlow(orderDtoForCreation: OrderDtoForCreation): Mono<CreatedOrderDto> {
-//        val orderStep = OrderStep(orderService, randomIdGenerator)
-//        val productStep = ProductStep()
-//
-//        return orderStep.process(orderDtoForCreation)
-////            .flatMap { createdOrderDto ->
-////                this.steps.add(orderStep )
-////                Mono.empty<CreatedOrderDto>()
-////            }
-//    }
-//
-//    fun revertFlow() {
-//
-//    }
-//}

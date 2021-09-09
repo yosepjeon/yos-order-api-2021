@@ -50,6 +50,7 @@ class OrderServiceTest @Autowired constructor(
         }
 
         val orderDtoForCreation = OrderDtoForCreation(
+            "",
             1000000,
             orderProducts,
             emptyList(),

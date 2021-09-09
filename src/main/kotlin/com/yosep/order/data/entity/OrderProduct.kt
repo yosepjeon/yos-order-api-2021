@@ -6,7 +6,7 @@ import org.springframework.data.domain.Persistable
 import org.springframework.data.relational.core.mapping.Table
 
 @Table("yos_product_in_order")
-data class OrderProduct (
+class OrderProduct (
     @Id
     val orderProductId: String,
     val orderId: String,

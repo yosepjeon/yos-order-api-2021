@@ -1,6 +1,7 @@
 package com.yosep.order.service
 
 import com.yosep.order.common.data.RandomIdGenerator
+import com.yosep.order.common.exception.DuplicateKeyException
 import com.yosep.order.data.dto.CreatedOrderDto
 import com.yosep.order.data.dto.OrderDtoForCreation
 import com.yosep.order.data.entity.Order
@@ -93,12 +94,82 @@ class OrderService @Autowired constructor(
 
     }
 
+    @Transactional(readOnly = false)
+    fun createOrderLegacy(orderDtoForCreation: OrderDtoForCreation): Mono<CreatedOrderDto> {
+        val order = Order(
+            orderDtoForCreation.orderId,
+            orderDtoForCreation.userId,
+            orderDtoForCreation.senderName,
+            orderDtoForCreation.receiverName,
+            orderDtoForCreation.phone,
+            orderDtoForCreation.postCode,
+            orderDtoForCreation.roadAddr,
+            orderDtoForCreation.jibunAddr,
+            orderDtoForCreation.extraAddr,
+            orderDtoForCreation.detailAddr,
+            orderDtoForCreation.orderState,
+        )
+        order.setAsNew()
+
+        return Mono.create<Order> { sink ->
+                sink.success(order)
+            }
+            .flatMap(orderRepository::save)
+            .flatMap { order ->
+                var i = 1
+                val orderProducts = mutableListOf<OrderProduct>()
+
+                orderDtoForCreation.orderProductDtos.forEach { orderProductDto ->
+                    val orderProduct = OrderProduct(
+                        order.orderId + i,
+                        order.orderId,
+                        orderProductDto.productId,
+                        orderProductDto.count,
+                        OrderProductState.READY.value
+                    )
+
+                    orderProduct.setAsNew()
+
+                    orderProducts.add(orderProduct)
+                    i++
+                }
+
+                orderProductRepository.saveAll(orderProducts.asIterable())
+                    .collectList()
+                    .flatMap { orderProducts ->
+                        Mono.create<CreatedOrderDto> { sink ->
+                            val createdOrderDto = CreatedOrderDto(
+                                order,
+                                orderProducts
+                            )
+
+                            sink.success(createdOrderDto)
+                        }
+                    }
+            }
+
+    }
+
+
+
+    fun checkDuplicateId(orderId: String): Mono<String> =
+        orderRepository.existsById(orderId)
+            .flatMap { result ->
+                if(result) {
+                    throw DuplicateKeyException()
+                }else {
+                    Mono.create<String> { monoSink ->
+                        monoSink.success(orderId)
+                    }
+                }
+            }
+
+
     /*
     *
      */
     @Transactional(readOnly = false)
     fun doOrder(orderDtoForCreation: OrderDtoForCreation) {
-
 //        createOrder(orderDtoForCreation)
 //            .flatMap { createdOrderDto:CreatedOrderDto ->
 //                Mono.empty<String>()

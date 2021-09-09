@@ -1,22 +1,21 @@
 package com.yosep.order.saga.http.step
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import com.yosep.order.data.dto.CreatedOrderDto
-import com.yosep.order.data.dto.OrderDtoForCreation
-import com.yosep.order.data.dto.OrderProductDiscountCouponStepDto
 import com.yosep.order.data.dto.OrderTotalDiscountCouponStepDto
-import com.yosep.order.data.vo.OrderProductDtoForCreation
-import com.yosep.order.data.vo.OrderTotalDiscountCouponDto
+import com.yosep.order.event.saga.revert.RevertTotalDiscountCouponStepEvent
+import com.yosep.order.mq.producer.OrderToCouponProducer
 import com.yosep.order.saga.http.WorkflowStep
 import com.yosep.order.saga.http.annotation.SagaStep
 import org.springframework.http.MediaType
-import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
+import java.lang.RuntimeException
 
 class TotalDiscountCouponStep(
     @JsonIgnore
     private val webClient: WebClient? = null,
+    @JsonIgnore
+    private var orderToCouponProducer: OrderToCouponProducer? = null,
     var orderTotalDiscountCouponStepDto: OrderTotalDiscountCouponStepDto,
     stepType: String = "TOTAL-DISCOUNT-COUPON",
     state: String = "READY"
@@ -41,9 +40,10 @@ class TotalDiscountCouponStep(
                 this.orderTotalDiscountCouponStepDto = orderTotalDiscountCouponStepDto
 
                 if (this.orderTotalDiscountCouponStepDto.state == "COMP") {
-                    this.state = "COMP"
+                    this.state = "TD_COUPON_STEP_COMP"
                 } else {
-                    this.state = "FAIL"
+                    this.state = "TD_COUPON_STEP_FAIL"
+                    throw RuntimeException(this.state)
                 }
 
                 println("[Total Discount Coupon Step]")
@@ -55,8 +55,19 @@ class TotalDiscountCouponStep(
             }
     }
 
-    override fun revert(): Mono<OrderTotalDiscountCouponStepDto> {
-        return Mono.empty()
+    override fun revert(orderId: String): Mono<Any> {
+        println("call total discount counpon step revert()")
+        val revertTotalDiscountCouponStepEvent = RevertTotalDiscountCouponStepEvent(
+            orderId,
+            orderTotalDiscountCouponStepDto.orderTotalDiscountCouponDtos
+        )
+
+        return orderToCouponProducer!!.publishRevertTotalDiscountCouponEvent(revertTotalDiscountCouponStepEvent)
+
+//        return Mono.create { monoSink ->
+//
+//            monoSink.success()
+//        }
     }
 
     private fun checkProductPrices() {

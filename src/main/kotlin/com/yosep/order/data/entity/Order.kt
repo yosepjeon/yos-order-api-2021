@@ -9,7 +9,7 @@ import java.time.LocalDateTime
 import javax.jdo.annotations.Column
 
 @Table("yos_order")
-data class Order (
+class Order (
     @Id
     @field:Column(length = 300)
     var orderId: String = "",

@@ -133,6 +133,7 @@ class OrderOrchestratorByWebclientTest @Autowired constructor(
         }
 
         val orderDtoForCreation = OrderDtoForCreation(
+            "",
             1000000,
             orderProducts,
             orderProductDiscountCouponDtos,
@@ -212,6 +213,7 @@ class OrderOrchestratorByWebclientTest @Autowired constructor(
         }
 
         val orderDtoForCreation = OrderDtoForCreation(
+            "",
             1000000,
             orderProducts,
             orderProductDiscountCouponDtos,
@@ -291,6 +293,7 @@ class OrderOrchestratorByWebclientTest @Autowired constructor(
         }
 
         val orderDtoForCreation = OrderDtoForCreation(
+            "",
             1000000,
             orderProducts,
             orderProductDiscountCouponDtos,

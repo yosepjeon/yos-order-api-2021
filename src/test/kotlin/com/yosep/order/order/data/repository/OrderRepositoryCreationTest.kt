@@ -60,6 +60,7 @@ class OrderRepositoryCreationTest @Autowired constructor(
         val orderProducts = mutableListOf<OrderProductDtoForCreation>()
 
         val orderDtoForCreation = OrderDtoForCreation(
+            "",
             10000000,
             orderProducts,
             emptyList(),
