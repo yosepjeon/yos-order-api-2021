@@ -11,6 +11,7 @@ import org.springframework.web.reactive.function.client.WebClient
 
 import com.yosep.order.saga.http.WorkflowStep
 import com.yosep.order.saga.http.annotation.SagaStep
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import reactor.kotlin.core.publisher.toMono
 

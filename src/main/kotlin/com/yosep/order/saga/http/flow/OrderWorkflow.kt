@@ -6,7 +6,9 @@ import com.yosep.order.common.data.RandomIdGenerator
 import com.yosep.order.common.exception.NotExistWorkflowException
 import com.yosep.order.data.dto.*
 import com.yosep.order.mq.producer.OrderToCouponProducer
+import com.yosep.order.mq.producer.OrderToProductCouponProducer
 import com.yosep.order.mq.producer.OrderToProductProducer
+import com.yosep.order.mq.producer.OrderToTotalCouponProducer
 import com.yosep.order.saga.http.Workflow
 import com.yosep.order.saga.http.WorkflowStep
 import com.yosep.order.saga.http.step.OrderStep
@@ -32,6 +34,10 @@ class OrderWorkflow(
     @JsonIgnore
     private var orderToProductProducer: OrderToProductProducer? = null,
     @JsonIgnore
+    private var orderToProductCouponProducer: OrderToProductCouponProducer? = null,
+    @JsonIgnore
+    private var orderToTotalCouponProducer: OrderToTotalCouponProducer? = null,
+    @JsonIgnore
     private var orderToCouponProducer: OrderToCouponProducer? = null,
     @JsonIgnore
     private var redisTemplate: ReactiveRedisTemplate<String, String>? = null,
@@ -50,6 +56,7 @@ class OrderWorkflow(
     createdDate: LocalDateTime = LocalDateTime.now()
 ) : Workflow<OrderDtoForCreation, CreatedOrderDto>(id, steps, type, state, createdDate) {
     fun processFlow(): Mono<Boolean> {
+        state = "PENDING"
         orderDtoForCreation.orderId = id
 
         val orderStep = OrderStep(orderService, randomIdGenerator, orderDtoForCreation)
@@ -60,7 +67,7 @@ class OrderWorkflow(
         )
         val productDiscountCouponStep = ProductDiscountCouponStep(
             couponWebclient,
-            orderToCouponProducer,
+            orderToProductCouponProducer,
             OrderProductDiscountCouponStepDto(
                 id,
                 orderDtoForCreation.orderProductDiscountCouponDtos
@@ -107,7 +114,7 @@ class OrderWorkflow(
 
                 totalDiscountCouponStep = TotalDiscountCouponStep(
                     couponWebclient,
-                    orderToCouponProducer,
+                    orderToTotalCouponProducer,
                     OrderTotalDiscountCouponStepDto(
                         id,
                         totalPrice,
@@ -129,6 +136,8 @@ class OrderWorkflow(
                     }
             }
             .flatMap {
+                this.state = "COMP"
+//                throw NotExistWorkflowException()
                 Mono.create<Boolean> { monoSink ->
                     monoSink.success(true)
                 }
@@ -156,7 +165,6 @@ class OrderWorkflow(
     fun revertFlow(): Mono<Unit> {
         println("call revertFlow()")
 
-        Mono.zip(Mono.just(1), Mono.just(2))
         val monos = mutableListOf<Mono<Any>>()
 
         steps.forEach { step ->

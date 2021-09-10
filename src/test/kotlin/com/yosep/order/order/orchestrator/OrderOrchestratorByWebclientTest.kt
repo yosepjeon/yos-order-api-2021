@@ -82,9 +82,9 @@ class OrderOrchestratorByWebclientTest @Autowired constructor(
     }
 
     @Test
-    @DisplayName("[OrderOrchestratorByWebclientTest] workflow_생성_및_저장_테스트")
+    @DisplayName("[OrderOrchestratorByWebclientTest] workflow_생성_및_저장_테스트1")
     fun workflow_생성_및_저장_테스트1() {
-        log.info("[OrderOrchestratorByWebclientTest] workflow_생성_및_저장_테스트")
+        log.info("[OrderOrchestratorByWebclientTest] workflow_생성_및_저장_테스트1")
 
         val productCount = (Math.random() * 5).toInt() + 1
 

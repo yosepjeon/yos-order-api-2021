@@ -1,7 +1,6 @@
 package com.yosep.order.mq.producer
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.yosep.order.event.saga.revert.RevertProductStepEvent
 import io.netty.util.internal.logging.Slf4JLoggerFactory
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -18,9 +17,9 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 @Component
-class OrderToProductProducer @Autowired constructor(
+class OrderToTotalCouponProducer@Autowired constructor(
     private val objectMapper: ObjectMapper
-):OrderToProducer {
+): OrderToProducer {
     private val log = Slf4JLoggerFactory.getInstance(OrderToProductProducer::class.java)
 
     private val BOOTSTRAP_SERVERS = "localhost:9092"
@@ -41,78 +40,14 @@ class OrderToProductProducer @Autowired constructor(
         dateFormat = SimpleDateFormat("HH:mm:ss:SSS z dd MMM yyyy")
     }
 
-    @Throws(InterruptedException::class)
-    fun publishRevertProductEvent(revertProductStepEvent: RevertProductStepEvent): Mono<Any> {
-        val message = objectMapper.writeValueAsString(revertProductStepEvent)
-
-        return sender!!.send(Flux.range(1, 1)
-            .map { i: Int ->
-                SenderRecord.create(
-                    ProducerRecord("revert-product-step", message),
-                    i
-                )
-            })
-            .toMono()
-            .doOnError { e: Throwable? ->
-                log.error(
-                    "Send failed",
-                    e
-                )
-            }
-            .flatMap { r: SenderResult<Int> ->
-                val metadata = r.recordMetadata()
-                System.out.printf(
-                    "Message %d sent successfully, topic-partition=%s-%d offset=%d timestamp=%s\n",
-                    r.correlationMetadata(),
-                    metadata.topic(),
-                    metadata.partition(),
-                    metadata.offset(),
-                    dateFormat!!.format(Date(metadata.timestamp()))
-                )
-
-                Mono.create<SenderResult<Int>> {
-                    it.success(r)
-                }
-            }
-//        return Mono.create<Any> {
-//            sender!!.send(Flux.range(1, 1)
-//                .map { i: Int ->
-//                    SenderRecord.create(
-//                        ProducerRecord("revert-product-step", message),
-//                        i
-//                    )
-//                }).toMono()
-//                .doOnError { e: Throwable? ->
-//                    log.error(
-//                        "Send failed",
-//                        e
-//                    )
-//                }
-//                .flatMap { r: SenderResult<Int> ->
-//                    val metadata = r.recordMetadata()
-//                    System.out.printf(
-//                        "Message %d sent successfully, topic-partition=%s-%d offset=%d timestamp=%s\n",
-//                        r.correlationMetadata(),
-//                        metadata.topic(),
-//                        metadata.partition(),
-//                        metadata.offset(),
-//                        dateFormat!!.format(Date(metadata.timestamp()))
-//                    )
-//
-//                    Mono.create<SenderResult<Int>> {
-//                        it.success(r)
-//                    }
-//                }
-//        }
-    }
-
     override fun publishRevertSagaStepEvent(event: Any): Mono<Any> {
         val message = objectMapper.writeValueAsString(event)
 
-        return sender!!.send(Flux.range(1, 1)
+        return sender!!.send(
+            Flux.range(1, 1)
             .map { i: Int ->
                 SenderRecord.create(
-                    ProducerRecord("revert-product-step", message),
+                    ProducerRecord("revert-total-discount-coupon-step", message),
                     i
                 )
             })
@@ -139,5 +74,4 @@ class OrderToProductProducer @Autowired constructor(
                 }
             }
     }
-
 }

@@ -4,8 +4,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import com.yosep.order.data.dto.OrderProductDiscountCouponStepDto
 import com.yosep.order.event.saga.revert.RevertProductDiscountCouponStepEvent
 import com.yosep.order.mq.producer.OrderToCouponProducer
+import com.yosep.order.mq.producer.OrderToProductCouponProducer
 import com.yosep.order.saga.http.WorkflowStep
 import com.yosep.order.saga.http.annotation.SagaStep
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
@@ -14,7 +16,8 @@ class ProductDiscountCouponStep(
     @JsonIgnore
     private val webClient: WebClient? = null,
     @JsonIgnore
-    private var orderToCouponProducer: OrderToCouponProducer? = null,
+    @Autowired
+    private var orderToCouponProducer: OrderToProductCouponProducer? = null,
     var orderProductDiscountCouponStepDto: OrderProductDiscountCouponStepDto,
     stepType: String = "PRODUCT-DISCOUNT-COUPON",
     state: String = "READY"
@@ -65,7 +68,8 @@ class ProductDiscountCouponStep(
             orderProductDiscountCouponStepDto.orderProductDiscountCouponDtos
         )
 
-        return orderToCouponProducer!!.publishRevertProductDiscountCouponEvent(revertProductDiscountCouponStepEvent)
+        return orderToCouponProducer!!.publishRevertSagaStepEvent(revertProductDiscountCouponStepEvent)
+//        return orderToCouponProducer!!.publishRevertProductDiscountCouponEvent(revertProductDiscountCouponStepEvent)
 //        return Mono.create { monoSink ->
 //
 //            monoSink.success()

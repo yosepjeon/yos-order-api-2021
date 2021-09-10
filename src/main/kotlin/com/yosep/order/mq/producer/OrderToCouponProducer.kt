@@ -21,7 +21,7 @@ import java.util.*
 @Component
 class OrderToCouponProducer @Autowired constructor(
     private val objectMapper: ObjectMapper
-) {
+): OrderToProducer {
     private val log = Slf4JLoggerFactory.getInstance(OrderToProductProducer::class.java)
 
     private val BOOTSTRAP_SERVERS = "localhost:9092"
@@ -76,37 +76,6 @@ class OrderToCouponProducer @Autowired constructor(
                     it.success(r)
                 }
             }
-//        return Mono.create<Any> {
-//            sender!!.send(
-//                Flux.range(1, 1)
-//                    .map { i: Int ->
-//                        SenderRecord.create(
-//                            ProducerRecord("revert-product-discount-coupon-step", message),
-//                            i
-//                        )
-//                    })
-//                .doOnError { e: Throwable? ->
-//                    log.error(
-//                        "Send failed",
-//                        e
-//                    )
-//                }
-//                .flatMap { r: SenderResult<Int> ->
-//                    val metadata = r.recordMetadata()
-//                    System.out.printf(
-//                        "Message %d sent successfully, topic-partition=%s-%d offset=%d timestamp=%s\n",
-//                        r.correlationMetadata(),
-//                        metadata.topic(),
-//                        metadata.partition(),
-//                        metadata.offset(),
-//                        dateFormat!!.format(Date(metadata.timestamp()))
-//                    )
-//
-//                    Mono.create<SenderResult<Int>> {
-//                        it.success(r)
-//                    }
-//                }
-//        }
     }
 
     @Throws(InterruptedException::class)
@@ -143,36 +112,40 @@ class OrderToCouponProducer @Autowired constructor(
                     it.success(r)
                 }
             }
-//        return Mono.create<Any> {
-//            sender!!.send(
-//                Flux.range(1, 1)
-//                    .map { i: Int ->
-//                        SenderRecord.create(
-//                            ProducerRecord("revert-total-discount-coupon-step", message),
-//                            i
-//                        )
-//                    })
-//                .doOnError { e: Throwable? ->
-//                    log.error(
-//                        "Send failed",
-//                        e
-//                    )
-//                }
-//                .flatMap { r: SenderResult<Int> ->
-//                    val metadata = r.recordMetadata()
-//                    System.out.printf(
-//                        "Message %d sent successfully, topic-partition=%s-%d offset=%d timestamp=%s\n",
-//                        r.correlationMetadata(),
-//                        metadata.topic(),
-//                        metadata.partition(),
-//                        metadata.offset(),
-//                        dateFormat!!.format(Date(metadata.timestamp()))
-//                    )
-//
-//                    Mono.create<SenderResult<Int>> {
-//                        it.success(r)
-//                    }
-//                }
-//        }
     }
+
+    override fun publishRevertSagaStepEvent(event: Any): Mono<Any> {
+        val message = objectMapper.writeValueAsString(event)
+
+        return sender!!.send(Flux.range(1, 1)
+            .map { i: Int ->
+                SenderRecord.create(
+                    ProducerRecord("revert-product-step", message),
+                    i
+                )
+            })
+            .toMono()
+            .doOnError { e: Throwable? ->
+                log.error(
+                    "Send failed",
+                    e
+                )
+            }
+            .flatMap { r: SenderResult<Int> ->
+                val metadata = r.recordMetadata()
+                System.out.printf(
+                    "Message %d sent successfully, topic-partition=%s-%d offset=%d timestamp=%s\n",
+                    r.correlationMetadata(),
+                    metadata.topic(),
+                    metadata.partition(),
+                    metadata.offset(),
+                    dateFormat!!.format(Date(metadata.timestamp()))
+                )
+
+                Mono.create<SenderResult<Int>> {
+                    it.success(r)
+                }
+            }
+    }
+
 }
