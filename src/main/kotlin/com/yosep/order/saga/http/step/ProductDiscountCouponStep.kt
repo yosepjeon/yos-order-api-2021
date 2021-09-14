@@ -27,7 +27,7 @@ class ProductDiscountCouponStep(
 ) {
     @SagaStep
     override fun process(): Mono<OrderProductDiscountCouponStepDto> {
-        this.state = "PENDING"
+        this.state = "PD_COUPON_STEP_PENDING"
         this.orderProductDiscountCouponStepDto.state = "PENDING"
 
         return webClient!!
@@ -69,10 +69,5 @@ class ProductDiscountCouponStep(
         )
 
         return orderToCouponProducer!!.publishRevertSagaStepEvent(revertProductDiscountCouponStepEvent)
-//        return orderToCouponProducer!!.publishRevertProductDiscountCouponEvent(revertProductDiscountCouponStepEvent)
-//        return Mono.create { monoSink ->
-//
-//            monoSink.success()
-//        }
     }
 }

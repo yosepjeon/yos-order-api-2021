@@ -30,5 +30,4 @@ open class WorkflowStep<R>(
 
     open fun process(): Mono<R> = Mono.empty()
     open fun revert(orderId: String): Mono<Any> = Mono.empty()
-//    open fun revert(orderId: String, orderToProducer: OrderToProducer): Mono<Any> = Mono.empty()
 }

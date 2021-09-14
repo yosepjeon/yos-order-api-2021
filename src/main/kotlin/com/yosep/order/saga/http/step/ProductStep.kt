@@ -30,7 +30,7 @@ class ProductStep(
 ) {
     @SagaStep
     override fun process(): Mono<ProductStepDtoForCreation> {
-        this.state = "PENDING"
+        this.state = "PRODUCT_STEP_PENDING"
 
         return webClient!!
             .post()
@@ -65,13 +65,6 @@ class ProductStep(
         )
 
         return orderToProductProducer!!.publishRevertProductEvent(revertProductStepEvent).toMono()
-//        return Mono.create { monoSink ->
-//
-//
-//            monoSink.success()
-//        }
-
-//        return produ
     }
 
     private fun checkProductPrices() {

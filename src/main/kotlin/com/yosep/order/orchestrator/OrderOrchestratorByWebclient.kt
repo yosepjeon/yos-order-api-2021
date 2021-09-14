@@ -10,6 +10,7 @@ import com.yosep.order.mq.producer.OrderToProductCouponProducer
 import com.yosep.order.mq.producer.OrderToProductProducer
 import com.yosep.order.mq.producer.OrderToTotalCouponProducer
 import com.yosep.order.saga.http.Workflow
+import com.yosep.order.saga.http.annotation.SagaStep
 import com.yosep.order.saga.http.flow.OrderWorkflow
 import com.yosep.order.service.OrderService
 import org.springframework.beans.factory.annotation.Autowired
@@ -36,7 +37,7 @@ class OrderOrchestratorByWebclient @Autowired constructor(
     private val redisTemplate: ReactiveRedisTemplate<String, String>,
     private val randomIdGenerator: RandomIdGenerator
 ) {
-
+    @SagaStep
     fun order(orderDtoForCreation: OrderDtoForCreation): Mono<CreatedOrderDto> {
 
         lateinit var orderWorkflow: OrderWorkflow
@@ -60,10 +61,13 @@ class OrderOrchestratorByWebclient @Autowired constructor(
     }
 
     fun revertOrder(orderId: String) {
-
+        TODO("모듈이 갑자기 다운되었을 경우 중단된 flow revert 구현")
+        TODO("Redis의 데이터가 소실되었을 경우 중단된 flow revert 구현")
     }
 
-    private fun createOrderWorkFlow(orderDtoForCreation: OrderDtoForCreation): Mono<OrderWorkflow> {
+//    @SagaStep
+    private fun createOrderWorkFlow(orderDtoForCreation: OrderDtoForCreation): Mono<OrderWorkflow>
+    {
         lateinit var orderEventId: String
         lateinit var orderWorkflow: OrderWorkflow
 
@@ -86,7 +90,6 @@ class OrderOrchestratorByWebclient @Autowired constructor(
                 )
 
                 val parsedOrderWorkFlow = objectMapper.writeValueAsString(orderWorkflow)
-                val workflow = objectMapper.readValue(parsedOrderWorkFlow, Workflow::class.java)
 
                 redisTemplate.opsForValue().setIfAbsent(orderEventId, parsedOrderWorkFlow)
             }

@@ -11,6 +11,7 @@ import com.yosep.order.mq.producer.OrderToProductProducer
 import com.yosep.order.mq.producer.OrderToTotalCouponProducer
 import com.yosep.order.saga.http.Workflow
 import com.yosep.order.saga.http.WorkflowStep
+import com.yosep.order.saga.http.annotation.SagaStep
 import com.yosep.order.saga.http.step.OrderStep
 import com.yosep.order.saga.http.step.ProductDiscountCouponStep
 import com.yosep.order.saga.http.step.ProductStep
@@ -79,9 +80,6 @@ class OrderWorkflow(
 
         return productStep.process()
             .doOnNext {
-//                if (it.state == "FAIL") {
-//                    throw StepFailException("product step fail exception")
-//                }
                 update(productStep as WorkflowStep<Any>)
                     .doOnNext { isSuccessUpdate ->
                         if (!isSuccessUpdate) {
@@ -137,7 +135,7 @@ class OrderWorkflow(
             }
             .flatMap {
                 this.state = "COMP"
-//                throw NotExistWorkflowException()
+                throw NotExistWorkflowException()
                 Mono.create<Boolean> { monoSink ->
                     monoSink.success(true)
                 }
@@ -160,6 +158,10 @@ class OrderWorkflow(
                     monoSink.success(false)
                 }
             }
+    }
+
+    fun processStep() {
+
     }
 
     fun revertFlow(): Mono<Unit> {

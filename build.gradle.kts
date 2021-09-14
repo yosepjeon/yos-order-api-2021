@@ -28,6 +28,7 @@ extra["axonVersion"] = "4.5.2"
 extra["mapstructVersion"] = "1.4.1.Final"
 
 dependencies {
+
 //  map struct
     implementation("org.mapstruct:mapstruct:1.4.1.Final")
     annotationProcessor("org.mapstruct:mapstruct-processor:1.4.1.Final")
@@ -89,6 +90,7 @@ dependencies {
     implementation("io.r2dbc:r2dbc-h2")
     implementation("org.mariadb:r2dbc-mariadb")
     implementation("org.mariadb.jdbc:mariadb-java-client")
+    implementation("org.springframework.boot:spring-boot-starter-aop")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("io.projectreactor:reactor-test")
     testImplementation("org.springframework.restdocs:spring-restdocs-webtestclient")
