@@ -181,22 +181,22 @@ class OrderOrchestratorByWebclientTest @Autowired constructor(
         }
 
         val orderProductDiscountCouponDtos = mutableListOf<OrderProductDiscountCouponDto>()
-        for (i in 1..2) {
-            val orderProductDiscountCouponDto = OrderProductDiscountCouponDto(
-                "PRODUCT",
-                "own-product-amount-coupon-test$i",
-                1L * i,
-                "user-admin-for-test",
-                10000,
-                0,
-                "test-product-category1-$i",
-                i * 111000L,
-                0,
-                "READY"
-            )
-
-            orderProductDiscountCouponDtos.add(orderProductDiscountCouponDto)
-        }
+//        for (i in 1..2) {
+//            val orderProductDiscountCouponDto = OrderProductDiscountCouponDto(
+//                "PRODUCT",
+//                "own-product-amount-coupon-test$i",
+//                1L * i,
+//                "user-admin-for-test",
+//                10000,
+//                0,
+//                "test-product-category1-$i",
+//                i * 111000L,
+//                0,
+//                "READY"
+//            )
+//
+//            orderProductDiscountCouponDtos.add(orderProductDiscountCouponDto)
+//        }
 
         val orderTotalDiscountCouponDtos = mutableListOf<OrderTotalDiscountCouponDto>()
         for(i in 1..1) {

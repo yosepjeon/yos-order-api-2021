@@ -135,17 +135,16 @@ class OrderWorkflow(
             }
             .flatMap {
                 this.state = "COMP"
-                throw NotExistWorkflowException()
+//                throw NotExistWorkflowException()
                 Mono.create<Boolean> { monoSink ->
                     monoSink.success(true)
                 }
             }
             .doOnNext {
-                println("[parsed this]")
+                println("[Complete]")
                 println(objectMapper!!.writeValueAsString(this))
             }
             .onErrorResume {
-                println("######")
                 println(it)
 
                 if (it is RuntimeException) {
