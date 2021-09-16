@@ -11,7 +11,6 @@ import com.yosep.order.mq.producer.OrderToProductProducer
 import com.yosep.order.mq.producer.OrderToTotalCouponProducer
 import com.yosep.order.saga.http.Workflow
 import com.yosep.order.saga.http.WorkflowStep
-import com.yosep.order.saga.http.annotation.SagaStep
 import com.yosep.order.saga.http.step.OrderStep
 import com.yosep.order.saga.http.step.ProductDiscountCouponStep
 import com.yosep.order.saga.http.step.ProductStep
@@ -56,17 +55,34 @@ class OrderWorkflow(
     state: String = "READY",
     createdDate: LocalDateTime = LocalDateTime.now()
 ) : Workflow<OrderDtoForCreation, CreatedOrderDto>(id, steps, type, state, createdDate) {
+
+    @JsonIgnore
+    var finalPrice: Long = 0
+
+    @JsonIgnore
+    lateinit var orderStep: OrderStep
+
+    @JsonIgnore
+    lateinit var productStep: ProductStep
+
+    @JsonIgnore
+    lateinit var productDiscountCouponStep: ProductDiscountCouponStep
+
+    @JsonIgnore
+    lateinit var totalDiscountCouponStep: TotalDiscountCouponStep
+
+
     fun processFlow(): Mono<Boolean> {
         state = "PENDING"
         orderDtoForCreation.orderId = id
 
-        val orderStep = OrderStep(orderService, randomIdGenerator, orderDtoForCreation)
-        val productStep = ProductStep(
+        orderStep = OrderStep(orderService, randomIdGenerator, orderDtoForCreation)
+        productStep = ProductStep(
             productWebclient,
             orderToProductProducer,
-            ProductStepDtoForCreation(id, orderDtoForCreation.totalPrice, orderDtoForCreation.orderProductDtos)
+            ProductStepDtoForCreation(id, orderDtoForCreation.orderProductDtos)
         )
-        val productDiscountCouponStep = ProductDiscountCouponStep(
+        productDiscountCouponStep = ProductDiscountCouponStep(
             couponWebclient,
             orderToProductCouponProducer,
             OrderProductDiscountCouponStepDto(
@@ -75,7 +91,6 @@ class OrderWorkflow(
             )
         )
 
-        var totalDiscountCouponStep: TotalDiscountCouponStep? = null
         var createdOrderDto: CreatedOrderDto? = null
 
         return productStep.process()
@@ -87,11 +102,12 @@ class OrderWorkflow(
                         }
                     }
             }
-            // !!!!
             .flatMap {
                 productDiscountCouponStep.process()
             }
             .doOnNext {
+
+
                 update(productDiscountCouponStep as WorkflowStep<Any>)
                     .doOnNext { isSuccessUpdate ->
                         if (!isSuccessUpdate) {
@@ -100,14 +116,19 @@ class OrderWorkflow(
                     }
             }
             .flatMap {
-                var totalPrice = 0L
+                finalPrice = 0L
 //                throw StepFailException("product step fail exception")
+                val map = mutableMapOf<String, Int>()
+
                 productDiscountCouponStep.orderProductDiscountCouponStepDto.orderProductDiscountCouponDtos.forEach {
-                    totalPrice += it.calculatedPrice
+                    finalPrice += it.calculatedPrice
+                    map[it.productId] = 1
                 }
 
                 productStep.productStepDtoForCreation.orderProductDtos.forEach {
-                    totalPrice += (it.count * it.price)
+                    if (map.getOrDefault(it.productId, -1) == -1) {
+                        finalPrice += (it.count * it.price)
+                    }
                 }
 
                 totalDiscountCouponStep = TotalDiscountCouponStep(
@@ -115,7 +136,7 @@ class OrderWorkflow(
                     orderToTotalCouponProducer,
                     OrderTotalDiscountCouponStepDto(
                         id,
-                        totalPrice,
+                        finalPrice,
                         orderDtoForCreation.orderTotalDiscountCouponDtos,
                         0L,
                         "READY"
@@ -126,6 +147,7 @@ class OrderWorkflow(
                 totalDiscountCouponStep!!.process()
             }
             .doOnNext {
+                finalPrice = it.calculatedPrice
                 update(totalDiscountCouponStep as WorkflowStep<Any>)
                     .doOnNext { isSuccessUpdate ->
                         if (!isSuccessUpdate) {
@@ -135,17 +157,25 @@ class OrderWorkflow(
             }
             .flatMap {
                 this.state = "COMP"
-//                throw NotExistWorkflowException()
+                throw NotExistWorkflowException()
+                printResult()
+
                 Mono.create<Boolean> { monoSink ->
-                    monoSink.success(true)
+                    if(finalPrice == orderDtoForCreation.totalPrice) {
+                        monoSink.success(true)
+                    }else {
+                        monoSink.success(false)
+                    }
                 }
             }
             .doOnNext {
-                println("[Complete]")
+                println("[Complete Result]")
                 println(objectMapper!!.writeValueAsString(this))
             }
             .onErrorResume {
+                println("[ERROR]")
                 println(it)
+                printResult()
 
                 if (it is RuntimeException) {
                     revertFlow()
@@ -159,7 +189,35 @@ class OrderWorkflow(
             }
     }
 
-    fun processStep() {
+    fun printResult() {
+        println("[최종 결과]")
+        println("orderId: ${orderDtoForCreation.orderId}")
+        println("order state: ${orderDtoForCreation.orderState}")
+        println()
+
+        println("상품 스텝 처리 결과")
+        productStep.productStepDtoForCreation.orderProductDtos.forEach { orderProductDto ->
+            println("productId: ${orderProductDto.productId} state: ${orderProductDto.state}")
+        }
+        println()
+
+        println("상품 할인 쿠폰 스텝 처리 결과")
+        productDiscountCouponStep.orderProductDiscountCouponStepDto.orderProductDiscountCouponDtos.forEach { orderProductDiscountCouponDto ->
+            println("couponByUserId: ${orderProductDiscountCouponDto.couponByUserId} state: ${orderProductDiscountCouponDto.state}")
+        }
+        println()
+
+        println("전체 할인 쿠폰 스텝 처리 결과")
+        totalDiscountCouponStep.orderTotalDiscountCouponStepDto.orderTotalDiscountCouponDtos.forEach { orderTotalDiscountCouponDto ->
+            println("couponByUserId: ${orderTotalDiscountCouponDto.couponByUserId} state: ${orderTotalDiscountCouponDto.state}")
+        }
+        println()
+        orderDtoForCreation.totalPrice
+        println("요청 가격: ${orderDtoForCreation.totalPrice}")
+        println("최종 가격: $finalPrice")
+    }
+
+    fun processStep(orderDtoForCreation: OrderDtoForCreation) {
 
     }
 

@@ -10,9 +10,9 @@ import javax.validation.constraints.Size
 data class ProductStepDtoForCreation(
     val orderId: String,
 
-    @field:NotNull
-    @field:Min(0)
-    val totalPrice: Long,
+//    @field:NotNull
+//    @field:Min(0)
+//    val totalPrice: Long,
 
     @field:NotEmpty
     @field:Size(min = 1)

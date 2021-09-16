@@ -56,7 +56,6 @@ class ProductDiscountCouponStep(
                 }
             }
             .doOnError {
-                println("################ $it")
                 throw RuntimeException("$it")
             }
     }

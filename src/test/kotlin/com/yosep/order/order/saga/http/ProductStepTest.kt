@@ -60,7 +60,7 @@ class ProductStepTest @Autowired constructor(
 
         val productStepDtoForCreation = ProductStepDtoForCreation(
             orderDtoForCreation.orderId,
-            orderDtoForCreation.totalPrice,
+//            orderDtoForCreation.totalPrice,
             orderDtoForCreation.orderProductDtos
         )
 
@@ -114,7 +114,7 @@ class ProductStepTest @Autowired constructor(
 
         val productStepDtoForCreation = ProductStepDtoForCreation(
             orderDtoForCreation.orderId,
-            orderDtoForCreation.totalPrice,
+//            orderDtoForCreation.totalPrice,
             orderDtoForCreation.orderProductDtos
         )
 
@@ -167,7 +167,7 @@ class ProductStepTest @Autowired constructor(
 
         val productStepDtoForCreation = ProductStepDtoForCreation(
             orderDtoForCreation.orderId,
-            orderDtoForCreation.totalPrice,
+//            orderDtoForCreation.totalPrice,
             orderDtoForCreation.orderProductDtos
         )
 

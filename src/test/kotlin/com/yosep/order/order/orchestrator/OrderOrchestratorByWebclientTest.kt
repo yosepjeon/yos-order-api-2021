@@ -86,7 +86,8 @@ class OrderOrchestratorByWebclientTest @Autowired constructor(
     fun workflow_생성_및_저장_테스트1() {
         log.info("[OrderOrchestratorByWebclientTest] workflow_생성_및_저장_테스트1")
 
-        val productCount = (Math.random() * 5).toInt() + 1
+//        val productCount = (Math.random() * 5).toInt() + 1
+        val productCount = 3
 
         val orderProducts = mutableListOf<OrderProductDtoForCreation>()
         for (i in 0 until productCount) {
@@ -134,7 +135,8 @@ class OrderOrchestratorByWebclientTest @Autowired constructor(
 
         val orderDtoForCreation = OrderDtoForCreation(
             "",
-            1000000,
+//            1000000,
+            626000,
             orderProducts,
             orderProductDiscountCouponDtos,
             orderTotalDiscountCouponDtos,
@@ -166,7 +168,8 @@ class OrderOrchestratorByWebclientTest @Autowired constructor(
     fun workflow_생성_및_저장_테스트2() {
         log.info("[OrderOrchestratorByWebclientTest] workflow_생성_및_저장_테스트")
 
-        val productCount = (Math.random() * 5).toInt() + 1
+//        val productCount = (Math.random() * 5).toInt() + 1
+        val productCount = 1
 
         val orderProducts = mutableListOf<OrderProductDtoForCreation>()
         for (i in 0 until productCount) {
@@ -214,7 +217,7 @@ class OrderOrchestratorByWebclientTest @Autowired constructor(
 
         val orderDtoForCreation = OrderDtoForCreation(
             "",
-            1000000,
+            99900,
             orderProducts,
             orderProductDiscountCouponDtos,
             orderTotalDiscountCouponDtos,
