@@ -51,8 +51,8 @@ class ProductStep(
                     throw RuntimeException(this.state)
                 }
 
-                println("[ProductStep]")
-                println(productStepDtoForCreation)
+//                println("[ProductStep]")
+//                println(productStepDtoForCreation)
             }
     }
 

@@ -23,7 +23,6 @@ class StepSageAop @Autowired constructor(
 
 
         // @LogExecutionTime 애노테이션이 붙어있는 타겟 메소드를 실행
-        println("AOP")
         joinPoint.target
 //        println("after proceed ${joinPoint.target}")
 //        return proceed // 결과 리턴

@@ -90,6 +90,18 @@ class OrderWorkflow(
                 orderDtoForCreation.orderProductDiscountCouponDtos
             )
         )
+        totalDiscountCouponStep = TotalDiscountCouponStep(
+            couponWebclient,
+            orderToTotalCouponProducer,
+            OrderTotalDiscountCouponStepDto(
+                id,
+                finalPrice,
+                orderDtoForCreation.orderTotalDiscountCouponDtos,
+                0L,
+                "READY"
+            )
+        )
+        printBeforeLogic()
 
         var createdOrderDto: CreatedOrderDto? = null
 
@@ -106,8 +118,6 @@ class OrderWorkflow(
                 productDiscountCouponStep.process()
             }
             .doOnNext {
-
-
                 update(productDiscountCouponStep as WorkflowStep<Any>)
                     .doOnNext { isSuccessUpdate ->
                         if (!isSuccessUpdate) {
@@ -157,13 +167,14 @@ class OrderWorkflow(
             }
             .flatMap {
                 this.state = "COMP"
-                throw NotExistWorkflowException()
+                orderDtoForCreation.orderState = "COMP"
+//                throw NotExistWorkflowException()
                 printResult()
 
                 Mono.create<Boolean> { monoSink ->
-                    if(finalPrice == orderDtoForCreation.totalPrice) {
+                    if (finalPrice == orderDtoForCreation.totalPrice) {
                         monoSink.success(true)
-                    }else {
+                    } else {
                         monoSink.success(false)
                     }
                 }
@@ -174,7 +185,8 @@ class OrderWorkflow(
             }
             .onErrorResume {
                 println("[ERROR]")
-                println(it)
+                println(it.suppressedExceptions[0].message)
+                orderDtoForCreation.orderState = if(it.message == null) "Unknown_Exception" else it.suppressedExceptions[0].message.toString()
                 printResult()
 
                 if (it is RuntimeException) {
@@ -189,8 +201,20 @@ class OrderWorkflow(
             }
     }
 
+    //  포트폴리오용 실제 로직에 사용 X
+    fun printBeforeLogic() {
+        println("[수행 전]")
+        printContent()
+    }
+
+    //  포트폴리오용 실제 로직에 사용 X
     fun printResult() {
         println("[최종 결과]")
+        printContent()
+    }
+
+    //  포트폴리오용 실제 로직에 사용 X
+    fun printContent() {
         println("orderId: ${orderDtoForCreation.orderId}")
         println("order state: ${orderDtoForCreation.orderState}")
         println()

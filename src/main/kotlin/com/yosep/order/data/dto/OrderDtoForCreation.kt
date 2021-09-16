@@ -60,5 +60,5 @@ data class OrderDtoForCreation(
     val detailAddr: String,
 
     @field:Size(max = 50)
-    val orderState: String
+    var orderState: String
 )

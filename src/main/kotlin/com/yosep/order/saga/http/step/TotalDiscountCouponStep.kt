@@ -46,13 +46,12 @@ class TotalDiscountCouponStep(
                     this.state = "TD_COUPON_STEP_COMP"
                 } else {
                     this.state = "TD_COUPON_STEP_FAIL"
-                    println("!!!!!!")
                     println(orderTotalDiscountCouponStepDto)
                     throw RuntimeException(this.state)
                 }
 
-                println("[Total Discount Coupon Step]")
-                println(orderTotalDiscountCouponStepDto)
+//                println("[Total Discount Coupon Step]")
+//                println(orderTotalDiscountCouponStepDto)
 
                 Mono.create<OrderTotalDiscountCouponStepDto> {
                     it.success(orderTotalDiscountCouponStepDto)
