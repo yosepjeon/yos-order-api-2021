@@ -56,7 +56,7 @@ class ProductDiscountCouponStep(
                 }
             }
             .doOnError {
-                throw RuntimeException("$it")
+                throw RuntimeException("${it.message}")
             }
     }
 

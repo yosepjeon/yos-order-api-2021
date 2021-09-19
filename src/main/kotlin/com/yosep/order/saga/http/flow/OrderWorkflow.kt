@@ -21,8 +21,8 @@ import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
 import reactor.kotlin.core.publisher.zip
-import java.lang.RuntimeException
 import java.time.LocalDateTime
+import kotlin.RuntimeException
 
 class OrderWorkflow(
     @JsonIgnore
@@ -184,18 +184,17 @@ class OrderWorkflow(
                 println(objectMapper!!.writeValueAsString(this))
             }
             .onErrorResume {
-                println("[ERROR]")
-                println(it.suppressedExceptions[0].message)
-                orderDtoForCreation.orderState = if(it.message == null) "Unknown_Exception" else it.suppressedExceptions[0].message.toString()
-                printResult()
-
-                if (it is RuntimeException) {
-                    revertFlow()
-                        .subscribe()
-                }
+                val exception = it as RuntimeException
 
                 Mono.create<Boolean> { monoSink ->
-//                    monoSink.success(createdOrderDto)
+                    orderDtoForCreation.orderState = if(it.message == null) "Unknown_Exception" else it.message.toString()
+                    printResult()
+
+                    if (it is RuntimeException) {
+                        revertFlow()
+                            .subscribe()
+                    }
+
                     monoSink.success(false)
                 }
             }
@@ -221,19 +220,19 @@ class OrderWorkflow(
 
         println("상품 스텝 처리 결과")
         productStep.productStepDtoForCreation.orderProductDtos.forEach { orderProductDto ->
-            println("productId: ${orderProductDto.productId} state: ${orderProductDto.state}")
+            println("productId: ${orderProductDto.productId} 상품 금액: ${orderProductDto.price} 요청 수량: ${orderProductDto.count} state: ${orderProductDto.state}")
         }
         println()
 
         println("상품 할인 쿠폰 스텝 처리 결과")
         productDiscountCouponStep.orderProductDiscountCouponStepDto.orderProductDiscountCouponDtos.forEach { orderProductDiscountCouponDto ->
-            println("couponByUserId: ${orderProductDiscountCouponDto.couponByUserId} state: ${orderProductDiscountCouponDto.state}")
+            println("couponByUserId: ${orderProductDiscountCouponDto.couponByUserId} 할인 금액: ${orderProductDiscountCouponDto.discountAmount} 할인 비율: ${orderProductDiscountCouponDto.discountPercent} state: ${orderProductDiscountCouponDto.state}")
         }
         println()
 
         println("전체 할인 쿠폰 스텝 처리 결과")
         totalDiscountCouponStep.orderTotalDiscountCouponStepDto.orderTotalDiscountCouponDtos.forEach { orderTotalDiscountCouponDto ->
-            println("couponByUserId: ${orderTotalDiscountCouponDto.couponByUserId} state: ${orderTotalDiscountCouponDto.state}")
+            println("couponByUserId: ${orderTotalDiscountCouponDto.couponByUserId} 할인 금액: ${orderTotalDiscountCouponDto.discountAmount} 할인 비율: ${orderTotalDiscountCouponDto.discountPercent} state: ${orderTotalDiscountCouponDto.state}")
         }
         println()
         orderDtoForCreation.totalPrice

@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
-import java.lang.RuntimeException
 
 class TotalDiscountCouponStep(
     @JsonIgnore
@@ -46,7 +45,6 @@ class TotalDiscountCouponStep(
                     this.state = "TD_COUPON_STEP_COMP"
                 } else {
                     this.state = "TD_COUPON_STEP_FAIL"
-                    println(orderTotalDiscountCouponStepDto)
                     throw RuntimeException(this.state)
                 }
 
@@ -56,6 +54,9 @@ class TotalDiscountCouponStep(
                 Mono.create<OrderTotalDiscountCouponStepDto> {
                     it.success(orderTotalDiscountCouponStepDto)
                 }
+            }
+            .doOnError {
+                throw RuntimeException("${it.message}")
             }
     }
 

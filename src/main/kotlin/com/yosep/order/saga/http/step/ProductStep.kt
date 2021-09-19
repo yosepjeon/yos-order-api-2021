@@ -54,6 +54,9 @@ class ProductStep(
 //                println("[ProductStep]")
 //                println(productStepDtoForCreation)
             }
+            .doOnError {
+                throw RuntimeException("${it.message}")
+            }
     }
 
     override fun revert(orderId: String): Mono<Any> {
