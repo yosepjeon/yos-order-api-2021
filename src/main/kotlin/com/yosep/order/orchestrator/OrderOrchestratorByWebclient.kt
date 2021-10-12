@@ -9,7 +9,6 @@ import com.yosep.order.data.entity.Order
 import com.yosep.order.mq.producer.OrderToProductCouponProducer
 import com.yosep.order.mq.producer.OrderToProductProducer
 import com.yosep.order.mq.producer.OrderToTotalCouponProducer
-import com.yosep.order.saga.http.Workflow
 import com.yosep.order.saga.http.annotation.SagaStep
 import com.yosep.order.saga.http.flow.OrderWorkflow
 import com.yosep.order.service.OrderService
